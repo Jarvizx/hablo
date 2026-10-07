@@ -1,0 +1,11 @@
+# Written by Claude Code when it loads the plugin
+.claude-plugin/types/
+tsconfig.json
+
+# System files: the plugin directory refuses them
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+
+node_modules/

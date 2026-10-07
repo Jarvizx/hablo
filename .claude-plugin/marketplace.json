@@ -1,0 +1,6 @@
+{
+  "name": "hablo",
+  "description": "Hablo: hear Claude Code's replies aloud in your language.",
+  "owner": { "name": "Robin Buitrago", "url": "https://github.com/Jarvizx" },
+  "plugins": [{ "name": "hablo", "source": "./" }]
+}

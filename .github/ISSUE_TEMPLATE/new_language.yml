@@ -1,0 +1,28 @@
+name: New language
+description: Ask for, or offer, support for another language
+labels: [language, good first issue]
+body:
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: Catalan (ca)
+    validations:
+      required: true
+  - type: textarea
+    id: words
+    attributes:
+      label: Very common words
+      description: About 20 short words that appear in almost any sentence, such as articles and prepositions.
+  - type: textarea
+    id: voices
+    attributes:
+      label: macOS voices
+      description: Run `say -v '?'` and paste the lines for this language.
+      render: text
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to open the pull request myself.

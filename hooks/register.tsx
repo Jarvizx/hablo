@@ -1,0 +1,246 @@
+import { atom, read, update } from 'claude-code'
+import type { EngineInterface, Register } from 'claude-code'
+
+import { LANGS, cleanForSpeech, detectLanguage, parseOverrides, parseVoices, pickVoice } from './speech'
+import type { Lang, Voice } from './speech'
+
+// What is being read now (a message id, `last` or `selection`), and the last reply.
+const speaking = atom({ plugin: 'hablo', key: 'speaking' } as const, null)
+const lastReply = atom({ plugin: 'hablo', key: 'lastReply' } as const, '')
+
+const MESSAGES = {
+  en: {
+    reading: '⏵ Reading aloud · /speak to stop',
+    started: 'Reading aloud. /speak again to stop.',
+    stopped: 'Stopped.',
+    nothing: 'Nothing to read yet.',
+    voices: 'Voices',
+    systemVoice: 'system default',
+    noSay: 'macOS `say` was not found: using the system synthesizer, which cannot be stopped.',
+    failed: 'could not read aloud',
+    listen: 'Listen',
+    stop: 'Stop',
+  },
+  es: {
+    reading: '⏵ Leyendo en voz alta · /speak para parar',
+    started: 'Leyendo en voz alta. /speak otra vez para parar.',
+    stopped: 'Parado.',
+    nothing: 'Todavía no hay nada que leer.',
+    voices: 'Voces',
+    systemVoice: 'la del sistema',
+    noSay: 'No se encontró `say` de macOS: se usa el sintetizador del sistema, que no se puede parar.',
+    failed: 'no se pudo leer en voz alta',
+    listen: 'Escuchar',
+    stop: 'Parar',
+  },
+}
+
+type Job = { id: string; text: string }
+
+// The words /speak takes, in English and Spanish.
+const ACTIONS: Partial<Record<string, 'stop' | 'voices'>> = {
+  stop: 'stop',
+  parar: 'stop',
+  voices: 'voices',
+  voces: 'voices',
+}
+
+// The module's own: they start over on a reload, which also ends any reading.
+let rate = 0
+let overrides: Partial<Record<string, string>> = {}
+let isAutoRead = false
+let t = MESSAGES.en
+let voices: Voice[] | undefined
+let hasSay = true
+let queue: Job[] = []
+let isWorking = false
+let pid: string | undefined
+let isStopping = false
+// A text too short or ambiguous to tell is read in the language read last.
+let lastLang: Lang | undefined
+
+const listVoices = async ($: EngineInterface) => {
+  if (voices === undefined) {
+    try {
+      const { exitCode, stdout } = await $.process.run(['say', '-v', '?'])
+      hasSay = exitCode === 0
+      voices = hasSay ? parseVoices(stdout) : []
+    } catch {
+      hasSay = false
+      voices = []
+    }
+  }
+
+  return voices
+}
+
+const voiceFor = async ($: EngineInterface, text: string) => {
+  const lang = detectLanguage(text) ?? lastLang
+  lastLang = lang
+
+  return lang ? pickVoice(await listVoices($), lang, overrides) : undefined
+}
+
+const kill = ($: EngineInterface, id: string) =>
+  $.process.run(['kill', id]).catch(() => undefined)
+
+// One utterance through `say`, run by a shell that first prints its pid so it can be stopped.
+const say = async ($: EngineInterface, text: string) => {
+  const voice = await voiceFor($, text)
+  if (!hasSay) {
+    await $.audio.speak(text.slice(0, 4096))
+    return
+  }
+
+  const args = [...(voice ? ['-v', voice] : []), ...(rate > 0 ? ['-r', String(rate)] : [])]
+  const child = $.process.spawn({
+    argv: ['/bin/sh', '-c', 'echo $$; exec say "$@"', 'hablo', ...args],
+    input: text,
+  })
+  let errors = ''
+
+  for await (const { stream, text: out } of child) {
+    if (stream === 'stderr') {
+      errors += out
+    } else if (pid === undefined) {
+      pid = out.trim().split('\n')[0]
+      if (isStopping && pid) {
+        await kill($, pid)
+      }
+    }
+  }
+
+  const end = await child.result
+  if (end.code !== 0 && end.signal === null && !isStopping) {
+    throw new Error(errors.trim() || `say exited with ${end.code}`)
+  }
+}
+
+// Reads the queue until it is empty; started by whoever queues the first job.
+const work = async ($: EngineInterface) => {
+  isWorking = true
+  try {
+    for (let job = queue.shift(); job; job = queue.shift()) {
+      isStopping = false
+      await update($, speaking, () => job.id)
+      $.ui.status(t.reading)
+      try {
+        await say($, job.text)
+      } catch (error) {
+        $.ui.toast(`hablo: ${t.failed}: ${error instanceof Error ? error.message : String(error)}`)
+      }
+      pid = undefined
+    }
+  } finally {
+    isWorking = false
+    await update($, speaking, () => null)
+    $.ui.status(undefined)
+  }
+}
+
+const stop = async ($: EngineInterface) => {
+  queue = []
+  isStopping = true
+  if (pid) {
+    await kill($, pid)
+  }
+}
+
+const start = async ($: EngineInterface, id: string, markdown: string) => {
+  const text = cleanForSpeech(markdown)
+  if (text === '') {
+    return false
+  }
+
+  await stop($)
+  queue = [{ id, text }]
+  if (!isWorking) {
+    void work($)
+  }
+
+  return true
+}
+
+export const register: Register = (on, options) => {
+  rate = typeof options.rate === 'number' ? options.rate : 0
+  overrides = parseOverrides(typeof options.voices === 'string' ? options.voices : '')
+  isAutoRead = options.autoRead === true
+
+  on('session.start', async ($, e, next) => {
+    const started = await next(e)
+    const locale = (await $.env.get('LC_ALL')) || (await $.env.get('LC_MESSAGES')) || (await $.env.get('LANG')) || ''
+    t = locale.toLowerCase().startsWith('es') ? MESSAGES.es : MESSAGES.en
+
+    await $.command.register({
+      name: 'speak',
+      description: 'Read aloud the selection or the last reply; again to stop',
+      argumentHint: '[stop | voices | text]',
+    })
+    // A reading cut by a reload leaves its id behind.
+    await update($, speaking, () => null)
+
+    return started
+  })
+
+  // Keeps the last reply for /speak, and reads it when autoRead is on.
+  on('turn.complete', async ($, e, next) => {
+    const result = await next(e)
+    if (e.reason === 'answer' && result.text.trim() !== '') {
+      await update($, lastReply, () => result.text)
+      if (isAutoRead) {
+        await start($, 'last', result.text)
+      }
+    }
+
+    return result
+  })
+
+  on('command.run', { command: 'speak' }, async ($, e) => {
+    const arg = e.args.trim()
+    // Bare /speak reads, or stops a reading.
+    const action = ACTIONS[arg.toLowerCase()] ?? (arg === '' && (await read($, speaking)) !== null ? 'stop' : undefined)
+
+    if (action === 'stop') {
+      await stop($)
+      return { text: t.stopped }
+    }
+
+    if (action === 'voices') {
+      const installed = await listVoices($)
+      const rows = LANGS.map(lang => `${lang}: ${pickVoice(installed, lang, overrides) ?? t.systemVoice}`)
+      return { text: [`${t.voices}:`, ...rows, ...(hasSay ? [] : [t.noSay])].join('\n') }
+    }
+
+    const selection = arg === '' ? await $.ui.selection() : undefined
+    const source = arg !== '' ? arg : selection?.text ?? (await read($, lastReply))
+    const isStarted = await start($, selection ? 'selection' : 'last', source)
+
+    return { text: isStarted ? t.started : t.nothing }
+  })
+
+  // Under each reply: [ ⏵ Listen ], and [ ⏹ Stop ] while that reply is read.
+  // Drawn in the accent color, inside brackets, so it stands out from the text.
+  on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
+    const own = await next(e)
+    const hasPointer = e.surface !== 'terminal' || e.viewport?.isFullscreen === true
+    if (!hasPointer || e.props.text.trim() === '') {
+      return own
+    }
+
+    const { Box, Button } = $.ui.resolve(e)
+    const isReading = (await read($, speaking)) === e.requestId
+
+    return (
+      <Box flexDirection="column">
+        {own}
+        <Box paddingLeft={2}>
+          {isReading ? (
+            <Button key="stop" variant="primary" label={`⏹ ${t.stop}`} onPress={() => stop($)} />
+          ) : (
+            <Button key="play" variant="primary" label={`⏵ ${t.listen}`} onPress={() => start($, e.requestId, e.props.text)} />
+          )}
+        </Box>
+      </Box>
+    )
+  })
+}
