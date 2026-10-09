@@ -1,18 +1,20 @@
 # Roadmap
 
-## v0.1 · Now
+## Done · up to 0.2.0
 
-- [x] `/hablo` reads the selection or the last reply
-- [x] `[ ⏵ Listen ]` and `[ ■ Stop ]` under each reply, with a turning reading indicator (0.1.1)
+- [x] `/hablo` reads the selection or the last reply, and stops a reading when run again, even while Claude is working
+- [x] `[ ⏵ Listen ]` under each reply, and `✻ Reading…  [ ■ Stop ]` while it reads
 - [x] Language detection (es, en, pt, fr, de, it) and a natural voice for each
 - [x] Markdown cleanup: code blocks, links, tables and symbols
 - [x] Settings: `rate`, `voices`, `autoRead`
-- [x] Experimental Windows support through PowerShell `System.Speech`
+- [x] Experimental Windows support through PowerShell `System.Speech`. First tried on a real machine: the button and reading work
+- [x] No glyph with an emoji form, so Windows Terminal draws them as text
 
-## v0.2 · Next
+## Next · 0.3
 
+- [ ] Windows: finish testing voices, accents, stop and `/clear`, then call it supported
 - [ ] Linux: `spd-say` or `espeak-ng`, with stop
-- [ ] Windows: confirm the experimental PowerShell `System.Speech` support on real machines
+- [ ] Clearer help on the settings screen: a suggested range for `rate`, and an example voice for each system
 - [ ] A keyboard shortcut to play and stop without typing `/hablo`
 - [ ] "Code block omitted" instead of skipping code in silence
 - [ ] Read the whole reply from any of its blocks
@@ -28,9 +30,9 @@
 ## Community
 
 - [x] `CONTRIBUTING.md`, issue templates and CI running `claude plugin validate` and `claude plugin test`
-- [ ] Demo GIF in the README
-- [x] Public repository and the `v0.1.0` and `v0.1.1` releases
+- [x] Public repository and releases up to `v0.2.0`
+- [ ] Demo in the README: a GIF, and a short video with sound
 - [ ] Submission to Anthropic's plugin directory
-- [ ] Proposal to [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code), through its issue form
+- [ ] Proposal to [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code), through its issue form, once the repository is two weeks old
 - [ ] A reply on the Claude Code issues that ask for text-to-speech
 - [ ] A post in English and Spanish showing how it was built
