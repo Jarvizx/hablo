@@ -29,7 +29,7 @@
 
 - [x] `CONTRIBUTING.md`, issue templates and CI running `claude plugin validate` and `claude plugin test`
 - [ ] Demo GIF in the README
-- [ ] Public repository and the `v0.1.0` release
+- [x] Public repository and the `v0.1.0` and `v0.1.1` releases
 - [ ] Submission to Anthropic's plugin directory
 - [ ] Proposal to [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code), through its issue form
 - [ ] A reply on the Claude Code issues that ask for text-to-speech
