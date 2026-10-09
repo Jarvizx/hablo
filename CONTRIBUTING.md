@@ -34,6 +34,13 @@ In that session, `/hablo Hello, this is a test` should read aloud. Edits to the 
 
 Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview). Its API is described in the `.d.ts` files Claude Code writes to `.claude-plugin/types/` the first time it loads the plugin.
 
+## How it works
+
+1. When a turn ends, Hablo keeps the reply's text in `$.state`.
+2. When you press Listen or run `/hablo`, it cleans the markdown, guesses the language from common words, and picks a voice: the one set with `/hablo voice`, or a natural installed one.
+3. It starts `say` on macOS, or a PowerShell script on Windows, which first prints its process id, so Stop can end it with `kill` or `taskkill`.
+4. Settings (`rate`, `voices`, `autoRead`) live in `$.store`, read again before each reading, so a change in one session applies in the others.
+
 ## Checks
 
 Run these before opening a pull request. CI runs the first two on every pull request.

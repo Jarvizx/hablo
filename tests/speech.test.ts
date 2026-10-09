@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { cleanForSpeech, detectLanguage, parseOverrides, parseVoices, pickVoice } from '../hooks/speech'
+import { cleanForSpeech, detectLanguage, findVoice, parseVoices, pickVoice } from '../hooks/speech'
 
 const SAY_OUTPUT = [
   'Eddy (Spanish (Mexico)) es_MX    # ¡Hola! Me llamo Eddy.',
@@ -70,6 +70,18 @@ describe('pickVoice', () => {
   })
 
   test('the setting wins', () => {
-    expect(pickVoice(voices, 'es', parseOverrides('es=Mónica, en=Samantha'))).toBe('Mónica')
+    expect(pickVoice(voices, 'es', { es: 'Mónica', en: 'Samantha' })).toBe('Mónica')
+  })
+
+  test('findVoice takes a full name or one of its words, in the right language', () => {
+    const windows = [
+      { name: 'Microsoft Helena Desktop', locale: 'es_ES' },
+      { name: 'Microsoft Zira Desktop', locale: 'en_US' },
+    ]
+
+    expect(findVoice(voices, 'es', 'mónica')?.name).toBe('Mónica')
+    expect(findVoice([{ name: 'Mónica (Spanish (Spain))', locale: 'es_ES' }], 'es', 'Mónica')?.name).toBe('Mónica (Spanish (Spain))')
+    expect(findVoice(windows, 'es', 'Helena')?.name).toBe('Microsoft Helena Desktop')
+    expect(findVoice(windows, 'es', 'Zira')).toBeUndefined()
   })
 })

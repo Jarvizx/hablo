@@ -53,15 +53,6 @@ export const parseVoices = (output: string): Voice[] =>
     return match?.[1] && match[2] ? [{ name: match[1].trim(), locale: match[2] }] : []
   })
 
-// `es=Paulina, en=Samantha` -> { es: 'Paulina', en: 'Samantha' }
-export const parseOverrides = (setting: string): Partial<Record<string, string>> =>
-  Object.fromEntries(
-    setting
-      .split(',')
-      .map(pair => pair.split('=').map(part => part.trim()))
-      .filter((pair): pair is [string, string] => pair.length === 2 && pair[0] !== '' && pair[1] !== ''),
-  )
-
 const PREFERRED: Record<Lang, readonly string[]> = {
   es: ['Paulina', 'Mónica', 'Monica', 'Jorge', 'Juan', 'Diego'],
   en: ['Samantha', 'Alex', 'Daniel', 'Karen', 'Moira', 'Tessa'],
@@ -137,3 +128,17 @@ export const cleanForSpeech = (markdown: string): string =>
     .map(line => (/[.!?:;,]$/.test(line) ? line : `${line}.`))
     .join('\n')
     .slice(0, MAX_CHARS)
+
+// The installed voice of `lang` a person means by `name`: its full name, or one of its
+// words, so `Mónica` finds `Mónica (Spanish (Spain))` and `Helena` `Microsoft Helena Desktop`.
+export const findVoice = (voices: readonly Voice[], lang: Lang, name: string): Voice | undefined => {
+  const wanted = name.trim().toLowerCase()
+  const ofLang = voices.filter(voice => voice.locale.toLowerCase().startsWith(`${lang}_`))
+
+  return (
+    ofLang.find(voice => voice.name.toLowerCase() === wanted) ??
+    ofLang.find(voice => voice.name.toLowerCase().split(/[\s()]+/).includes(wanted))
+  )
+}
+
+export const isLang = (value: string): value is Lang => (LANGS as string[]).includes(value)

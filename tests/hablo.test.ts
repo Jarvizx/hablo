@@ -3,7 +3,8 @@ import type { On } from 'claude-code'
 
 import { powershell, speakScript, toBase64, utf8 } from '../hooks/sapi'
 
-const VOICES = 'Paulina             es_MX    # Hola, me llamo Paulina.\nSamantha            en_US    # Hello, my name is Samantha.\n'
+const VOICES =
+  'Paulina             es_MX    # Hola, me llamo Paulina.\nMónica              es_ES    # Hola, me llamo Mónica.\nSamantha            en_US    # Hello, my name is Samantha.\n'
 const SAPI_VOICES = 'Microsoft Helena Desktop|es-ES\r\nMicrosoft Zira Desktop|en-US\r\n'
 
 const command = (args: string) =>
@@ -26,7 +27,7 @@ const reply = (surface: 'terminal' | 'desktop', text: string) =>
 
 // Stands in for the host: lists the voices, records each `say` it is asked to run and
 // each `kill`, and resolves `idle` once the reading is over and the status line cleared.
-const host = (on: On, env: Record<string, string> = {}) => {
+const host = (on: On, env: Record<string, string> = {}, store: Record<string, unknown> = {}) => {
   const spoken: { argv: readonly string[]; input?: string }[] = []
   const killed: string[] = []
   const statuses: (string | undefined)[] = []
@@ -39,6 +40,8 @@ const host = (on: On, env: Record<string, string> = {}) => {
   let endSay = () => {}
 
   mock.env(on, env)
+  // The plugin's own store, where /hablo keeps its settings.
+  mock.store(on, store)
   // Holds the reading indicator's timer: it turns only when a test advances it.
   const clock = mock.clock(on)
   on('process.run', (_, e) => {
@@ -218,4 +221,66 @@ test('/clear stops the voice', async ($, on) => {
   await idle
 
   expect(killed).toEqual(['4242'])
+})
+
+const SPANISH = 'Hola, esto es una prueba para ver si el mod lee bien'
+
+test('/hablo rate sets the speed, and the next reading uses it', async ($, on) => {
+  const { spoken, idle } = host(on)
+
+  expect((await $.command.run(command('rate 220'))).text).toBe('Speaking rate: 220 words per minute.')
+  expect((await $.command.run(command('rate fast'))).text).toContain('from 0 (system default) to 500')
+
+  await $.command.run(command(SPANISH))
+  await idle
+  expect(spoken[0]?.argv).toEqual(expect.arrayContaining(['-r', '220']))
+})
+
+test('settings saved in an earlier session apply', async ($, on) => {
+  const { spoken, idle } = host(on, {}, { rate: 180, voices: { es: 'Mónica' } })
+
+  await $.command.run(command(SPANISH))
+  await idle
+
+  expect(spoken[0]?.argv).toEqual(expect.arrayContaining(['-v', 'Mónica', '-r', '180']))
+})
+
+test('/hablo voice picks a voice for a language, and clears it again', async ($, on) => {
+  const { spoken, idle } = host(on)
+
+  expect((await $.command.run(command('voice es Mónica'))).text).toBe('Voice for es: Mónica.')
+  expect((await $.command.run(command('voz es Jorge'))).text).toBe('No es voice called "Jorge". Installed: Paulina, Mónica.')
+  expect((await $.command.run(command('voice ca Montserrat'))).text).toContain('Hablo has no "ca"')
+
+  await $.command.run(command(SPANISH))
+  await idle
+  expect(spoken[0]?.argv).toContain('Mónica')
+
+  expect((await $.command.run(command('voice es'))).text).toBe('Voice for es: automatic.')
+})
+
+test('/hablo voice finds a Windows voice by one of its words', async ($, on) => {
+  host(on, { OS: 'Windows_NT' })
+
+  expect((await $.command.run(command('voice es Helena'))).text).toBe('Voice for es: Microsoft Helena Desktop.')
+})
+
+test('/hablo auto on reads each reply when the turn ends', async ($, on) => {
+  const { spoken, idle } = host(on)
+  on('turn.complete', (_, e) => ({ text: e.answer }))
+
+  expect((await $.command.run(command('auto on'))).text).toBe('Read every reply: on.')
+  await $.turn.complete({ reason: 'answer', answer: SPANISH, durationMs: 10, isAborted: false, turnId: 'turn-1' })
+  await idle
+
+  expect(spoken[0]?.input).toBe(`${SPANISH}.`)
+})
+
+test('/hablo voices shows the settings too', async ($, on) => {
+  host(on)
+  const res = await $.command.run(command('voices'))
+
+  expect(res.text).toContain('es: Paulina')
+  expect(res.text).toContain('Speaking rate: system default.')
+  expect(res.text).toContain('Read every reply: off.')
 })

@@ -1,37 +1,26 @@
 {
   "name": "hablo",
   "displayName": "Hablo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Hear Claude Code's replies aloud in your language: a Listen button under each reply and /hablo. Free and offline on macOS and Windows.",
-  "author": { "name": "Robin Buitrago", "url": "https://github.com/Jarvizx" },
+  "author": {
+    "name": "Robin Buitrago",
+    "url": "https://github.com/Jarvizx"
+  },
   "homepage": "https://github.com/Jarvizx/hablo#readme",
   "repository": "https://github.com/Jarvizx/hablo",
   "documentationUrl": "https://github.com/Jarvizx/hablo#readme",
   "supportUrl": "https://github.com/Jarvizx/hablo/issues",
   "license": "MIT",
-  "keywords": ["tts", "text-to-speech", "read-aloud", "accessibility", "voice", "speech", "macos"],
+  "keywords": [
+    "tts",
+    "text-to-speech",
+    "read-aloud",
+    "accessibility",
+    "voice",
+    "speech",
+    "macos"
+  ],
   "icon": "./assets/icon.png",
-  "types": "./types/index.d.ts",
-  "userConfig": {
-    "rate": {
-      "type": "number",
-      "title": "Speaking rate",
-      "description": "Words per minute. 0 keeps the system default.",
-      "default": 0,
-      "min": 0,
-      "max": 500
-    },
-    "voices": {
-      "type": "string",
-      "title": "Voices",
-      "description": "Voice per language, e.g. es=Paulina, en=Samantha. Empty picks one automatically.",
-      "default": ""
-    },
-    "autoRead": {
-      "type": "boolean",
-      "title": "Read every reply",
-      "description": "Read each reply aloud as soon as Claude finishes.",
-      "default": false
-    }
-  }
+  "types": "./types/index.d.ts"
 }

@@ -4,9 +4,18 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.3.0]
+
+### Changed
+
+- **Breaking:** no setup screen at install. Settings move from `/config` to the command: `/hablo rate <n>`, `/hablo voice <lang> <name>` and `/hablo auto on|off` (also `velocidad`, `voz`, `auto sí|no`). They are saved in Hablo's own store and last across sessions. Values set in `/config` before 0.3.0 are not carried over.
+- `/hablo voices` also shows the current settings.
+- `/hablo voice` finds a voice by one of its words, so `Mónica` or `Helena` is enough.
+
 ### Docs
 
 - Windows is supported: voices, accents, stop and `/clear` tested on Windows 11.
+- A shorter README, with the requirements next to the install line, `/tui fullscreen` for the button, and a compatibility table that says what was tried by hand. How Hablo works moves to CONTRIBUTING.
 
 ## [0.2.0]
 

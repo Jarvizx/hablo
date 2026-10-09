@@ -12,4 +12,4 @@ Include what you found, how to reproduce it, and what it could let someone do. Y
 
 ## What Hablo can do on your machine
 
-Hablo runs `say`, `/bin/sh` and `kill` on macOS, and `powershell.exe` and `taskkill` on Windows. It reads the text it speaks, three locale variables and `OS`. It does not use the network. The full list is in the README, under [What Hablo runs and what data it uses](README.md#what-hablo-runs-and-what-data-it-uses). Anything Hablo does beyond that list is a bug worth reporting.
+Hablo runs `say`, `/bin/sh` and `kill` on macOS, and `powershell.exe` and `taskkill` on Windows. It reads the text it speaks, three locale variables and `OS`, and saves only its settings in its own store file. It does not use the network. The full list is in the README, under [What Hablo runs and what data it uses](README.md#what-hablo-runs-and-what-data-it-uses). Anything Hablo does beyond that list is a bug worth reporting.
