@@ -10,7 +10,7 @@
 - [x] Windows support through PowerShell `System.Speech`, tested on Windows 11
 - [x] No glyph with an emoji form, so Windows Terminal draws them as text
 
-## Next · 0.3
+## Next · 0.4
 
 - [ ] Linux: `spd-say` or `espeak-ng`, with stop
 - [ ] A keyboard shortcut to play and stop without typing `/hablo`
