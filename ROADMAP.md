@@ -7,11 +7,12 @@
 - [x] Language detection (es, en, pt, fr, de, it) and a natural voice for each
 - [x] Markdown cleanup: code blocks, links, tables and symbols
 - [x] Settings: `rate`, `voices`, `autoRead`
+- [x] Experimental Windows support through PowerShell `System.Speech`
 
 ## v0.2 · Next
 
 - [ ] Linux: `spd-say` or `espeak-ng`, with stop
-- [ ] Windows: PowerShell `System.Speech`
+- [ ] Windows: confirm the experimental PowerShell `System.Speech` support on real machines
 - [ ] A keyboard shortcut to play and stop without typing `/speak`
 - [ ] "Code block omitted" instead of skipping code in silence
 - [ ] Read the whole reply from any of its blocks

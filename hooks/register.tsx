@@ -1,6 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
+import { VOICES_SCRIPT, parseSapiVoices, powershell, sapiRate, speakScript, toBase64, utf8 } from './sapi'
 import { LANGS, cleanForSpeech, detectLanguage, parseOverrides, parseVoices, pickVoice } from './speech'
 import type { Lang, Voice } from './speech'
 
@@ -16,7 +17,7 @@ const MESSAGES = {
     nothing: 'Nothing to read yet.',
     voices: 'Voices',
     systemVoice: 'system default',
-    noSay: 'macOS `say` was not found: using the system synthesizer, which cannot be stopped.',
+    noSay: 'No macOS or Windows voices were found: using the system synthesizer, which cannot be stopped.',
     failed: 'could not read aloud',
     listen: 'Listen',
     stop: 'Stop',
@@ -28,7 +29,7 @@ const MESSAGES = {
     nothing: 'Todavía no hay nada que leer.',
     voices: 'Voces',
     systemVoice: 'la del sistema',
-    noSay: 'No se encontró `say` de macOS: se usa el sintetizador del sistema, que no se puede parar.',
+    noSay: 'No se encontraron voces de macOS ni de Windows: se usa el sintetizador del sistema, que no se puede parar.',
     failed: 'no se pudo leer en voz alta',
     listen: 'Escuchar',
     stop: 'Parar',
@@ -51,7 +52,8 @@ let overrides: Partial<Record<string, string>> = {}
 let isAutoRead = false
 let t = MESSAGES.en
 let voices: Voice[] | undefined
-let hasSay = true
+// Who speaks: macOS `say`, Windows SAPI through PowerShell, or the engine's own synthesizer.
+let synth: 'say' | 'sapi' | 'system' = 'system'
 let queue: Job[] = []
 let isWorking = false
 let pid: string | undefined
@@ -59,14 +61,16 @@ let isStopping = false
 // A text too short or ambiguous to tell is read in the language read last.
 let lastLang: Lang | undefined
 
+// Finds the synthesizer and its voices once per load.
 const listVoices = async ($: EngineInterface) => {
   if (voices === undefined) {
+    const isWindows = (await $.env.get('OS')) === 'Windows_NT'
     try {
-      const { exitCode, stdout } = await $.process.run(['say', '-v', '?'])
-      hasSay = exitCode === 0
-      voices = hasSay ? parseVoices(stdout) : []
+      const { exitCode, stdout } = await $.process.run(isWindows ? powershell(VOICES_SCRIPT) : ['say', '-v', '?'])
+      synth = exitCode !== 0 ? 'system' : isWindows ? 'sapi' : 'say'
+      voices = synth === 'system' ? [] : isWindows ? parseSapiVoices(stdout) : parseVoices(stdout)
     } catch {
-      hasSay = false
+      synth = 'system'
       voices = []
     }
   }
@@ -82,21 +86,27 @@ const voiceFor = async ($: EngineInterface, text: string) => {
 }
 
 const kill = ($: EngineInterface, id: string) =>
-  $.process.run(['kill', id]).catch(() => undefined)
+  $.process.run(synth === 'sapi' ? ['taskkill', '/PID', id, '/F'] : ['kill', id]).catch(() => undefined)
 
-// One utterance through `say`, run by a shell that first prints its pid so it can be stopped.
+// What starts one utterance. Each prints its pid first so it can be stopped:
+// on macOS a shell that then becomes `say`, on Windows a PowerShell script.
+const speech = (voice: string | undefined, text: string) => {
+  if (synth === 'sapi') {
+    return { argv: powershell(speakScript(voice, sapiRate(rate))), input: toBase64(utf8(text)) }
+  }
+
+  const args = [...(voice ? ['-v', voice] : []), ...(rate > 0 ? ['-r', String(rate)] : [])]
+  return { argv: ['/bin/sh', '-c', 'echo $$; exec say "$@"', 'hablo', ...args], input: text }
+}
+
 const say = async ($: EngineInterface, text: string) => {
   const voice = await voiceFor($, text)
-  if (!hasSay) {
+  if (synth === 'system') {
     await $.audio.speak(text.slice(0, 4096))
     return
   }
 
-  const args = [...(voice ? ['-v', voice] : []), ...(rate > 0 ? ['-r', String(rate)] : [])]
-  const child = $.process.spawn({
-    argv: ['/bin/sh', '-c', 'echo $$; exec say "$@"', 'hablo', ...args],
-    input: text,
-  })
+  const child = $.process.spawn(speech(voice, text))
   let errors = ''
 
   for await (const { stream, text: out } of child) {
@@ -112,7 +122,7 @@ const say = async ($: EngineInterface, text: string) => {
 
   const end = await child.result
   if (end.code !== 0 && end.signal === null && !isStopping) {
-    throw new Error(errors.trim() || `say exited with ${end.code}`)
+    throw new Error(errors.trim() || `${synth} exited with ${end.code}`)
   }
 }
 
@@ -208,7 +218,7 @@ export const register: Register = (on, options) => {
     if (action === 'voices') {
       const installed = await listVoices($)
       const rows = LANGS.map(lang => `${lang}: ${pickVoice(installed, lang, overrides) ?? t.systemVoice}`)
-      return { text: [`${t.voices}:`, ...rows, ...(hasSay ? [] : [t.noSay])].join('\n') }
+      return { text: [`${t.voices}:`, ...rows, ...(synth === 'system' ? [t.noSay] : [])].join('\n') }
     }
 
     const selection = arg === '' ? await $.ui.selection() : undefined

@@ -12,7 +12,7 @@ Look for issues labeled `good first issue`.
 
 ## Run it locally
 
-You need macOS and Claude Code 2.1.292 or later.
+You need macOS (or Windows, for the experimental support) and Claude Code 2.1.292 or later.
 
 ```bash
 git clone https://github.com/Jarvizx/hablo
@@ -28,6 +28,7 @@ In that session, `/speak Hello, this is a test` should read aloud. Edits to the 
 | --- | --- |
 | `hooks/register.tsx` | The hooks: the Listen button, `/speak`, the last reply, and the `say` process |
 | `hooks/speech.ts` | Pure helpers with no `$`: markdown cleanup, language detection, voice choice |
+| `hooks/sapi.ts` | Pure helpers for Windows: the PowerShell scripts and their encoding |
 | `types/index.d.ts` | The `$.state` values the plugin keeps |
 | `tests/` | Tests for `claude plugin test` |
 | `.claude-plugin/` | The plugin manifest and the marketplace file |

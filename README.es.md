@@ -4,7 +4,7 @@
 
 [Read in English](README.md)
 
-Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/speak` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS: gratis, sin conexión y sin claves de API.
+Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/speak` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS y, en modo experimental, las de Windows: gratis, sin conexión y sin claves de API.
 
 ## Para qué
 
@@ -16,7 +16,7 @@ Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un 
 
 - **`[ ⏵ Escuchar ]` debajo de cada respuesta:** púlsalo para escucharla. Mientras lee, se convierte en `[ ⏹ Parar ]`.
 - **`/speak`:** lee el texto que hayas seleccionado con el ratón o, si no hay selección, la última respuesta. Si lo vuelves a lanzar, para.
-- **Tu idioma:** detecta español, inglés, portugués, francés, alemán e italiano, y usa una voz natural instalada en tu Mac para cada uno.
+- **Tu idioma:** detecta español, inglés, portugués, francés, alemán e italiano, y usa una voz natural instalada en tu equipo para cada uno.
 - **Texto limpio:** quita bloques de código, enlaces, tablas y símbolos de markdown antes de leer.
 - **Privado:** nada sale de tu equipo. Mira [qué ejecuta Hablo](#qué-ejecuta-hablo-y-qué-datos-usa).
 
@@ -59,31 +59,37 @@ Para escuchar una voz antes de elegirla, ejecuta `say -v Mónica "Hola"` en una 
 
 macOS tiene voces **Enhanced** y **Premium** gratuitas que suenan mucho más naturales que las básicas. Descárgalas en **Ajustes del Sistema › Accesibilidad › Contenido leído › Voz del sistema › Gestionar voces**. Hablo las prefiere automáticamente.
 
+En Windows, Hablo usa las voces que ve `System.Speech`, como Microsoft Helena, Sabina o Zira. Para añadir idiomas, ve a **Configuración › Hora e idioma › Voz**.
+
 ## Compatibilidad
 
 | Dónde | Estado |
 | --- | --- |
 | macOS, terminal y app de escritorio | ✅ Soportado |
 | Extensión de VS Code | ⚠️ El botón pasa el kit de tests, sin probar en un VS Code real |
-| Linux, Windows | ⚠️ Usa el sintetizador del sistema que encuentre Claude Code, sin elegir voz ni parar. Sin probar. Se busca ayuda, mira el [roadmap](ROADMAP.md) |
+| Windows | 🧪 Experimental: voces de Windows a través de PowerShell, con elección de voz y parar. En pruebas |
+| Linux | ⚠️ Usa el sintetizador del sistema que encuentre Claude Code, sin elegir voz ni parar. Sin probar. Se busca ayuda, mira el [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, contenedores | ❌ El sonido sale en la máquina donde corre Claude Code, no en la tuya |
 
 Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview): un plugin de function hooks. Esa API está en acceso anticipado y puede cambiar entre versiones de Claude Code. Hablo está probado en Claude Code 2.1.292.
 
 ## Qué ejecuta Hablo y qué datos usa
 
-Hablo no usa la red y no envía nada a ningún sitio. La voz la genera macOS en tu equipo.
+Hablo no usa la red y no envía nada a ningún sitio. La voz la genera tu sistema operativo en tu equipo.
 
 | Qué | Cuándo | Para qué |
 | --- | --- | --- |
 | `say -v '?'` | Una vez por sesión, la primera vez que lee | Lista las voces instaladas en tu Mac |
 | `/bin/sh -c 'echo $$; exec say …'`, con el texto por la entrada estándar | Cada vez que lee | Lee el texto e imprime el id del proceso para poder pararlo |
 | `kill <pid>` | Cuando paras una lectura | Termina ese proceso `say` |
+| `powershell.exe` con `System.Speech`, en Windows | La primera vez que lee, y cada vez que lee | Lista las voces de Windows y lee el texto, que recibe en base64 por la entrada estándar |
+| `taskkill /PID <pid> /F`, en Windows | Cuando paras una lectura | Termina ese proceso de PowerShell |
 
 Lee:
 
 - **El texto de una respuesta, o el que hayas seleccionado,** solo para leerlo en voz alta.
 - **Las variables de entorno `LC_ALL`, `LC_MESSAGES` y `LANG`,** para mostrar sus mensajes en inglés o en español.
+- **La variable de entorno `OS`,** para reconocer Windows.
 
 Guarda la última respuesta en la memoria de la sesión para `/speak`, y nada en disco. Tus ajustes viven en el `settings.json` de Claude Code, como los de cualquier plugin.
 

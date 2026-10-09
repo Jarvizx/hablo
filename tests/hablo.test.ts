@@ -1,7 +1,10 @@
 import { expect, mock, test } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
+import { powershell, speakScript, toBase64, utf8 } from '../hooks/sapi'
+
 const VOICES = 'Paulina             es_MX    # Hola, me llamo Paulina.\nSamantha            en_US    # Hello, my name is Samantha.\n'
+const SAPI_VOICES = 'Microsoft Helena Desktop|es-ES\r\nMicrosoft Zira Desktop|en-US\r\n'
 
 const command = (args: string) =>
   ({
@@ -23,7 +26,7 @@ const reply = (surface: 'terminal' | 'desktop', text: string) =>
 
 // Stands in for the host: lists the voices, records each `say` it is asked to run and
 // each `kill`, and resolves `idle` once the reading is over and the status line cleared.
-const host = (on: On) => {
+const host = (on: On, env: Record<string, string> = {}) => {
   const spoken: { argv: readonly string[]; input?: string }[] = []
   const killed: string[] = []
   let markIdle = () => {}
@@ -34,14 +37,15 @@ const host = (on: On) => {
   let isLong = false
   let endSay = () => {}
 
-  mock.env(on, {})
+  mock.env(on, env)
   on('process.run', (_, e) => {
-    if (e.argv[0] === 'kill') {
-      killed.push(e.argv[1] ?? '')
+    if (e.argv[0] === 'kill' || e.argv[0] === 'taskkill') {
+      killed.push(e.argv.at(e.argv[0] === 'kill' ? 1 : 2) ?? '')
       endSay()
     }
+    const stdout = e.argv[0] === 'powershell.exe' ? SAPI_VOICES : VOICES
 
-    return { value: { exitCode: 0, stdout: VOICES, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+    return { value: { exitCode: 0, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
   })
   on('process.spawn', async function* (_, e) {
     spoken.push({ argv: e.argv, input: e.input })
@@ -135,4 +139,28 @@ test('the button shows on the terminal too, in its fullscreen layout', async ($,
 
   expect(await ui.find({ key: 'play' })).toBeDefined()
   await ui.unmount()
+})
+
+test('on Windows it speaks through PowerShell with a Windows voice, and stops with taskkill', async ($, on) => {
+  const { spoken, killed, idle, started, readUntilKilled } = host(on, { OS: 'Windows_NT' })
+  readUntilKilled()
+  const text = 'Hola, esto es una prueba para ver si el mod lee bien en Windows'
+
+  await $.command.run(command(text))
+  await started
+
+  expect(spoken[0]?.argv).toEqual(powershell(speakScript('Microsoft Helena Desktop', 0)))
+  expect(spoken[0]?.input).toBe(toBase64(utf8(`${text}.`)))
+
+  await $.command.run(command('stop'))
+  await idle
+  expect(killed).toEqual(['4242'])
+})
+
+test('/speak voices lists the Windows voices on Windows', async ($, on) => {
+  host(on, { OS: 'Windows_NT' })
+  const res = await $.command.run(command('voices'))
+
+  expect(res.text).toContain('es: Microsoft Helena Desktop')
+  expect(res.text).toContain('en: Microsoft Zira Desktop')
 })

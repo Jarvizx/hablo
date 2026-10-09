@@ -13,3 +13,4 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 - Language detection for Spanish, English, Portuguese, French, German and Italian, with a natural macOS voice for each.
 - Markdown cleanup before reading: code blocks, links, tables and symbols.
 - Settings: `rate`, `voices` and `autoRead`.
+- Experimental Windows support: Windows voices through PowerShell `System.Speech`, with voice choice and stop.
