@@ -11,7 +11,7 @@ Look for issues labeled `good first issue`.
 
 ## Run it locally
 
-You need macOS (or Windows, for the experimental support) and Claude Code 2.1.287 or later.
+You need macOS or Windows, and Claude Code 2.1.287 or later.
 
 ```bash
 git clone https://github.com/Jarvizx/hablo

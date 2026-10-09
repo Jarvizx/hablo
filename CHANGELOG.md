@@ -4,6 +4,10 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Docs
+
+- Windows is supported: voices, accents, stop and `/clear` tested on Windows 11.
+
 ## [0.2.0]
 
 ### Changed

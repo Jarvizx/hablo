@@ -7,12 +7,11 @@
 - [x] Language detection (es, en, pt, fr, de, it) and a natural voice for each
 - [x] Markdown cleanup: code blocks, links, tables and symbols
 - [x] Settings: `rate`, `voices`, `autoRead`
-- [x] Experimental Windows support through PowerShell `System.Speech`. First tried on a real machine: the button and reading work
+- [x] Windows support through PowerShell `System.Speech`, tested on Windows 11
 - [x] No glyph with an emoji form, so Windows Terminal draws them as text
 
 ## Next · 0.3
 
-- [ ] Windows: finish testing voices, accents, stop and `/clear`, then call it supported
 - [ ] Linux: `spd-say` or `espeak-ng`, with stop
 - [ ] Clearer help on the settings screen: a suggested range for `rate`, and an example voice for each system
 - [ ] A keyboard shortcut to play and stop without typing `/hablo`

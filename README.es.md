@@ -4,7 +4,7 @@
 
 [Read in English](README.md)
 
-Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/hablo` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS y, en modo experimental, las de Windows: gratis, sin conexión y sin claves de API.
+Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/hablo` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS y con Windows: gratis, sin conexión y sin claves de API.
 
 ## Para qué
 
@@ -67,7 +67,7 @@ En Windows, Hablo usa las voces que ve `System.Speech`, como Microsoft Helena, S
 | --- | --- |
 | macOS, terminal y app de escritorio | ✅ Soportado |
 | Extensión de VS Code | ⚠️ `/hablo` funciona, pero Claude Code no dibuja nada de los mods en el panel de chat de la extensión, así que no hay botón. En la terminal integrada de VS Code funciona todo |
-| Windows | 🧪 Experimental: voces de Windows a través de PowerShell, con elección de voz y parar. En pruebas |
+| Windows | ✅ Soportado, probado en Windows 11: voces de Windows a través de PowerShell, con elección de voz y parar |
 | Linux | ⚠️ Usa el sintetizador del sistema que encuentre Claude Code, sin elegir voz ni parar. Sin probar. Se busca ayuda, mira el [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, contenedores | ❌ El sonido sale en la máquina donde corre Claude Code, no en la tuya |
 

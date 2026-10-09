@@ -9,7 +9,7 @@
 
 <!-- Demo: add docs/demo.gif here once it is recorded. -->
 
-Hablo is a plugin for Claude Code that reads replies aloud. It puts a **Listen** button under each reply, adds a `/hablo` command, and picks a natural voice for the language of each reply. It runs on the voices that come with macOS, and on Windows voices in an experimental mode: free, offline, no API keys.
+Hablo is a plugin for Claude Code that reads replies aloud. It puts a **Listen** button under each reply, adds a `/hablo` command, and picks a natural voice for the language of each reply. It runs on the voices that come with macOS and Windows: free, offline, no API keys.
 
 ## Why
 
@@ -72,7 +72,7 @@ On Windows, Hablo uses the voices that `System.Speech` sees, such as Microsoft H
 | --- | --- |
 | macOS, terminal and desktop app | ✅ Supported |
 | VS Code extension | ⚠️ `/hablo` works, but Claude Code draws nothing from mods in the extension's chat panel, so there is no button. In VS Code's integrated terminal everything works |
-| Windows | 🧪 Experimental: Windows voices through PowerShell, with voice choice and stop. Being tested |
+| Windows | ✅ Supported, tested on Windows 11: Windows voices through PowerShell, with voice choice and stop |
 | Linux | ⚠️ Falls back to the system synthesizer Claude Code finds, without voice choice or stop. Untested. Help wanted, see the [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, containers | ❌ The sound plays on the machine where Claude Code runs, not on yours |
 

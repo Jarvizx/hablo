@@ -2,7 +2,7 @@
   "name": "hablo",
   "displayName": "Hablo",
   "version": "0.2.0",
-  "description": "Hear Claude Code's replies aloud in your language: a Listen button under each reply and /hablo. Free and offline on macOS.",
+  "description": "Hear Claude Code's replies aloud in your language: a Listen button under each reply and /hablo. Free and offline on macOS and Windows.",
   "author": { "name": "Robin Buitrago", "url": "https://github.com/Jarvizx" },
   "homepage": "https://github.com/Jarvizx/hablo#readme",
   "repository": "https://github.com/Jarvizx/hablo",
