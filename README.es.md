@@ -14,8 +14,8 @@ Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un 
 
 ## Funciones
 
-- **`[ ⏵ Escuchar ]` debajo de cada respuesta:** púlsalo para escucharla. Mientras lee, se convierte en `[ ⏹ Parar ]`.
-- **`/speak`:** lee el texto que hayas seleccionado con el ratón o, si no hay selección, la última respuesta. Si lo vuelves a lanzar, para.
+- **`[ ⏵ Escuchar ]` debajo de cada respuesta:** púlsalo para escucharla. Mientras lee, la fila muestra `✻ Leyendo…  [ ⏹ Parar ]`, con el símbolo girando como el spinner de Claude.
+- **`/speak`:** lee el texto que hayas seleccionado con el ratón o, si no hay selección, la última respuesta. Si lo vuelves a lanzar, para, aunque Claude esté trabajando. No escribe nada en la conversación, así el contexto de Claude queda limpio, y una línea bajo el prompt indica que está leyendo.
 - **Tu idioma:** detecta español, inglés, portugués, francés, alemán e italiano, y usa una voz natural instalada en tu equipo para cada uno.
 - **Texto limpio:** quita bloques de código, enlaces, tablas y símbolos de markdown antes de leer.
 - **Privado:** nada sale de tu equipo. Mira [qué ejecuta Hablo](#qué-ejecuta-hablo-y-qué-datos-usa).
@@ -66,12 +66,12 @@ En Windows, Hablo usa las voces que ve `System.Speech`, como Microsoft Helena, S
 | Dónde | Estado |
 | --- | --- |
 | macOS, terminal y app de escritorio | ✅ Soportado |
-| Extensión de VS Code | ⚠️ El botón pasa el kit de tests, sin probar en un VS Code real |
+| Extensión de VS Code | ⚠️ `/speak` funciona, pero Claude Code no dibuja nada de los mods en el panel de chat de la extensión, así que no hay botón. En la terminal integrada de VS Code funciona todo |
 | Windows | 🧪 Experimental: voces de Windows a través de PowerShell, con elección de voz y parar. En pruebas |
 | Linux | ⚠️ Usa el sintetizador del sistema que encuentre Claude Code, sin elegir voz ni parar. Sin probar. Se busca ayuda, mira el [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, contenedores | ❌ El sonido sale en la máquina donde corre Claude Code, no en la tuya |
 
-Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview): un plugin de function hooks. Esa API está en acceso anticipado y puede cambiar entre versiones de Claude Code. Hablo está probado en Claude Code 2.1.292.
+Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview): un plugin de function hooks. Necesita Claude Code 2.1.287 o posterior, la primera versión con los mods activados por defecto, y está probado en 2.1.292. La API de mods aún puede cambiar entre versiones.
 
 ## Qué ejecuta Hablo y qué datos usa
 

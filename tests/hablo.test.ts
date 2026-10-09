@@ -29,6 +29,7 @@ const reply = (surface: 'terminal' | 'desktop', text: string) =>
 const host = (on: On, env: Record<string, string> = {}) => {
   const spoken: { argv: readonly string[]; input?: string }[] = []
   const killed: string[] = []
+  const statuses: (string | undefined)[] = []
   let markIdle = () => {}
   const idle = new Promise<void>(resolve => (markIdle = resolve))
   let markStarted = () => {}
@@ -38,6 +39,8 @@ const host = (on: On, env: Record<string, string> = {}) => {
   let endSay = () => {}
 
   mock.env(on, env)
+  // Holds the reading indicator's timer: it turns only when a test advances it.
+  const clock = mock.clock(on)
   on('process.run', (_, e) => {
     if (e.argv[0] === 'kill' || e.argv[0] === 'taskkill') {
       killed.push(e.argv.at(e.argv[0] === 'kill' ? 1 : 2) ?? '')
@@ -60,6 +63,7 @@ const host = (on: On, env: Record<string, string> = {}) => {
   })
   on('ui.selection', () => ({ value: undefined }))
   on('ui.status', (_, e) => {
+    statuses.push(e.text)
     if (e.text === undefined) {
       markIdle()
     }
@@ -70,7 +74,7 @@ const host = (on: On, env: Record<string, string> = {}) => {
   // The engine's own drawing of the reply, which the plugin wraps.
   on('ui.render', () => ({ type: 'engine' as const, ref: 0 }))
 
-  return { spoken, killed, idle, started, readUntilKilled: () => (isLong = true) }
+  return { spoken, killed, statuses, clock, idle, started, readUntilKilled: () => (isLong = true) }
 }
 
 test('/speak with nothing to read says so', async ($, on) => {
@@ -80,10 +84,13 @@ test('/speak with nothing to read says so', async ($, on) => {
   expect(res.text).toBe('Nothing to read yet.')
 })
 
-test('/speak <text> reads it with a Spanish voice', async ($, on) => {
-  const { spoken, idle } = host(on)
-  await $.command.run(command('Hola, esto es una prueba para ver si el mod lee bien'))
+test('/speak <text> reads it with a Spanish voice, shows the status line and prints nothing', async ($, on) => {
+  const { spoken, statuses, idle } = host(on)
+  const res = await $.command.run(command('Hola, esto es una prueba para ver si el mod lee bien'))
   await idle
+
+  expect(res.text).toBeUndefined()
+  expect(statuses[0]).toContain('Reading aloud')
 
   expect(spoken).toHaveLength(1)
   expect(spoken[0]?.argv).toContain('Paulina')
@@ -99,7 +106,7 @@ test('/speak again stops the reading', async ($, on) => {
   const res = await $.command.run(command(''))
   await idle
 
-  expect(res.text).toBe('Stopped.')
+  expect(res.text).toBeUndefined()
   expect(killed).toEqual(['4242'])
 })
 
@@ -116,7 +123,7 @@ test('/speak parar stops it too', async ($, on) => {
 })
 
 test('[ ⏵ Listen ] under a reply reads it, and [ ⏹ Stop ] stops it', async ($, on) => {
-  const { spoken, killed, idle, started, readUntilKilled } = host(on)
+  const { spoken, killed, statuses, clock, idle, started, readUntilKilled } = host(on)
   readUntilKilled()
   const ui = await $.ui.mount(reply('desktop', 'This is a long reply that you will want to stop before the end'))
 
@@ -124,6 +131,13 @@ test('[ ⏵ Listen ] under a reply reads it, and [ ⏹ Stop ] stops it', async (
   await started
   expect(spoken[0]?.argv).toContain('Samantha')
   expect(await ui.find({ key: 'play' })).toBeUndefined()
+
+  // The row shows a turning glyph and "Reading…" beside Stop, and no status line.
+  const before = (await ui.find({ type: 'Text', text: /Reading…/ }))?.text
+  expect(before).toContain('Reading…')
+  await clock.advance(140)
+  expect((await ui.find({ type: 'Text', text: /Reading…/ }))?.text).not.toBe(before)
+  expect(statuses.filter(Boolean)).toEqual([])
 
   await ui.press({ key: 'stop' })
   await idle
@@ -163,4 +177,32 @@ test('/speak voices lists the Windows voices on Windows', async ($, on) => {
 
   expect(res.text).toContain('es: Microsoft Helena Desktop')
   expect(res.text).toContain('en: Microsoft Zira Desktop')
+})
+
+test('/speak is registered to run while Claude is working', async ($, on) => {
+  host(on)
+  const registered: { name: string; immediate?: true }[] = []
+  on('command.register', (_, e) => {
+    registered.push(e)
+
+    return { value: { command: e.name } }
+  })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+
+  await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+
+  expect(registered[0]).toMatchObject({ name: 'speak', immediate: true })
+})
+
+test('/clear stops the voice', async ($, on) => {
+  const { killed, idle, started, readUntilKilled } = host(on)
+  readUntilKilled()
+  on('session.end', (_, e) => ({ sessionId: e.sessionId }))
+
+  await $.command.run(command('This is a long reply that is still being read when the person clears the session'))
+  await started
+  await $.session.end({ reason: 'clear', sessionId: 'session-1', resume: { id: 'session-1' } })
+  await idle
+
+  expect(killed).toEqual(['4242'])
 })

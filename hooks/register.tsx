@@ -5,15 +5,21 @@ import { VOICES_SCRIPT, parseSapiVoices, powershell, sapiRate, speakScript, toBa
 import { LANGS, cleanForSpeech, detectLanguage, parseOverrides, parseVoices, pickVoice } from './speech'
 import type { Lang, Voice } from './speech'
 
-// What is being read now (a message id, `last` or `selection`), and the last reply.
+// What is being read now (a message id, `last` or `selection`), the frame of its
+// reading indicator, and the last reply.
 const speaking = atom({ plugin: 'hablo', key: 'speaking' } as const, null)
+const frame = atom({ plugin: 'hablo', key: 'frame' } as const, 0)
 const lastReply = atom({ plugin: 'hablo', key: 'lastReply' } as const, '')
+
+// The glyphs of Claude Code's own spinner, there and back.
+const GLYPHS = ['·', '✢', '✳', '✶', '✻', '✽', '✻', '✶', '✳', '✢']
+// Under the 10 redraws a second a transcript row is allowed.
+const FRAME_MS = 140
 
 const MESSAGES = {
   en: {
     reading: '⏵ Reading aloud · /speak to stop',
-    started: 'Reading aloud. /speak again to stop.',
-    stopped: 'Stopped.',
+    readingShort: 'Reading…',
     nothing: 'Nothing to read yet.',
     voices: 'Voices',
     systemVoice: 'system default',
@@ -24,8 +30,7 @@ const MESSAGES = {
   },
   es: {
     reading: '⏵ Leyendo en voz alta · /speak para parar',
-    started: 'Leyendo en voz alta. /speak otra vez para parar.',
-    stopped: 'Parado.',
+    readingShort: 'Leyendo…',
     nothing: 'Todavía no hay nada que leer.',
     voices: 'Voces',
     systemVoice: 'la del sistema',
@@ -36,7 +41,9 @@ const MESSAGES = {
   },
 }
 
-type Job = { id: string; text: string }
+// `hasStatus`: the reading shows on the status line, for when no reply row shows it
+// (started from /speak or autoRead, not from a reply's own button).
+type Job = { id: string; text: string; hasStatus: boolean }
 
 // The words /speak takes, in English and Spanish.
 const ACTIONS: Partial<Record<string, 'stop' | 'voices'>> = {
@@ -127,13 +134,15 @@ const say = async ($: EngineInterface, text: string) => {
 }
 
 // Reads the queue until it is empty; started by whoever queues the first job.
+// While it reads, a timer turns the indicator of the row being read.
 const work = async ($: EngineInterface) => {
   isWorking = true
+  const spinner = $.clock.every(FRAME_MS, () => void update($, frame, n => (n + 1) % GLYPHS.length))
   try {
     for (let job = queue.shift(); job; job = queue.shift()) {
       isStopping = false
       await update($, speaking, () => job.id)
-      $.ui.status(t.reading)
+      $.ui.status(job.hasStatus ? t.reading : undefined)
       try {
         await say($, job.text)
       } catch (error) {
@@ -142,6 +151,7 @@ const work = async ($: EngineInterface) => {
       pid = undefined
     }
   } finally {
+    spinner.cancel()
     isWorking = false
     await update($, speaking, () => null)
     $.ui.status(undefined)
@@ -156,14 +166,14 @@ const stop = async ($: EngineInterface) => {
   }
 }
 
-const start = async ($: EngineInterface, id: string, markdown: string) => {
+const start = async ($: EngineInterface, id: string, markdown: string, hasStatus: boolean) => {
   const text = cleanForSpeech(markdown)
   if (text === '') {
     return false
   }
 
   await stop($)
-  queue = [{ id, text }]
+  queue = [{ id, text, hasStatus }]
   if (!isWorking) {
     void work($)
   }
@@ -185,11 +195,21 @@ export const register: Register = (on, options) => {
       name: 'speak',
       description: 'Read aloud the selection or the last reply; again to stop',
       argumentHint: '[stop | voices | text]',
+      // So that /speak stops a reading at once, even while Claude is working.
+      immediate: true,
     })
     // A reading cut by a reload leaves its id behind.
     await update($, speaking, () => null)
 
     return started
+  })
+
+  // /clear, /resume and /branch reset the plugin's state: stop the voice with it,
+  // or it would go on with nothing left on screen to stop it.
+  on('session.end', async ($, e, next) => {
+    await stop($)
+
+    return next(e)
   })
 
   // Keeps the last reply for /speak, and reads it when autoRead is on.
@@ -198,13 +218,15 @@ export const register: Register = (on, options) => {
     if (e.reason === 'answer' && result.text.trim() !== '') {
       await update($, lastReply, () => result.text)
       if (isAutoRead) {
-        await start($, 'last', result.text)
+        await start($, 'last', result.text, true)
       }
     }
 
     return result
   })
 
+  // Starting and stopping print nothing: the status line shows the reading, and a
+  // line in the transcript would also land in what Claude reads.
   on('command.run', { command: 'speak' }, async ($, e) => {
     const arg = e.args.trim()
     // Bare /speak reads, or stops a reading.
@@ -212,7 +234,7 @@ export const register: Register = (on, options) => {
 
     if (action === 'stop') {
       await stop($)
-      return { text: t.stopped }
+      return {}
     }
 
     if (action === 'voices') {
@@ -223,13 +245,13 @@ export const register: Register = (on, options) => {
 
     const selection = arg === '' ? await $.ui.selection() : undefined
     const source = arg !== '' ? arg : selection?.text ?? (await read($, lastReply))
-    const isStarted = await start($, selection ? 'selection' : 'last', source)
+    const isStarted = await start($, selection ? 'selection' : 'last', source, true)
 
-    return { text: isStarted ? t.started : t.nothing }
+    return isStarted ? {} : { text: t.nothing }
   })
 
-  // Under each reply: [ ⏵ Listen ], and [ ⏹ Stop ] while that reply is read.
-  // Drawn in the accent color, inside brackets, so it stands out from the text.
+  // Under each reply: [ ⏵ Listen ]. While that reply is read: a turning glyph in
+  // Claude's accent color, "Reading…", and [ ⏹ Stop ].
   on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
     const own = await next(e)
     const hasPointer = e.surface !== 'terminal' || e.viewport?.isFullscreen === true
@@ -237,17 +259,29 @@ export const register: Register = (on, options) => {
       return own
     }
 
-    const { Box, Button } = $.ui.resolve(e)
+    const { Box, Button, Text } = $.ui.resolve(e)
     const isReading = (await read($, speaking)) === e.requestId
+    // Only the row being read reads the frame, so only it redraws as it turns.
+    const glyph = isReading ? GLYPHS[(await read($, frame)) % GLYPHS.length] : undefined
 
     return (
       <Box flexDirection="column">
         {own}
-        <Box paddingLeft={2}>
+        <Box paddingLeft={2} columnGap={2}>
           {isReading ? (
-            <Button key="stop" variant="primary" label={`⏹ ${t.stop}`} onPress={() => stop($)} />
+            <>
+              <Text key="reading" color="claude">
+                {glyph} {t.readingShort}
+              </Text>
+              <Button key="stop" variant="primary" label={`⏹ ${t.stop}`} onPress={() => stop($)} />
+            </>
           ) : (
-            <Button key="play" variant="primary" label={`⏵ ${t.listen}`} onPress={() => start($, e.requestId, e.props.text)} />
+            <Button
+              key="play"
+              variant="primary"
+              label={`⏵ ${t.listen}`}
+              onPress={() => start($, e.requestId, e.props.text, false)}
+            />
           )}
         </Box>
       </Box>

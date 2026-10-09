@@ -19,8 +19,8 @@ Hablo is a plugin for Claude Code that reads replies aloud. It puts a **Listen**
 
 ## Features
 
-- **`[ ⏵ Listen ]` under every reply:** press it to hear that reply. While it reads, it turns into `[ ⏹ Stop ]`.
-- **`/speak`:** reads the text you selected with the mouse, or the last reply when nothing is selected. Run it again to stop.
+- **`[ ⏵ Listen ]` under every reply:** press it to hear that reply. While it reads, the row shows `✻ Reading…  [ ⏹ Stop ]`, with the glyph turning like Claude's own spinner.
+- **`/speak`:** reads the text you selected with the mouse, or the last reply when nothing is selected. Run it again to stop, even while Claude is working. It prints nothing in the conversation, so Claude's context stays clean, and a line under the prompt shows that it is reading.
 - **Your language:** detects Spanish, English, Portuguese, French, German and Italian, and picks a natural voice installed on your computer for each one.
 - **Speakable text:** code blocks, links, tables and markdown symbols are cleaned up before reading.
 - **Private:** nothing leaves your machine. See [what Hablo runs](#what-hablo-runs-and-what-data-it-uses).
@@ -71,12 +71,12 @@ On Windows, Hablo uses the voices that `System.Speech` sees, such as Microsoft H
 | Where | Status |
 | --- | --- |
 | macOS, terminal and desktop app | ✅ Supported |
-| VS Code extension | ⚠️ The button passes the test kit, not yet tried in a real VS Code |
+| VS Code extension | ⚠️ `/speak` works, but Claude Code draws nothing from mods in the extension's chat panel, so there is no button. In VS Code's integrated terminal everything works |
 | Windows | 🧪 Experimental: Windows voices through PowerShell, with voice choice and stop. Being tested |
 | Linux | ⚠️ Falls back to the system synthesizer Claude Code finds, without voice choice or stop. Untested. Help wanted, see the [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, containers | ❌ The sound plays on the machine where Claude Code runs, not on yours |
 
-Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview): a plugin of function hooks. That API is in early access and may change between Claude Code releases. Hablo is tested on Claude Code 2.1.292.
+Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview): a plugin of function hooks. It needs Claude Code 2.1.287 or later, the first version with mods on by default, and is tested on 2.1.292. The mods API may still change between releases.
 
 ## What Hablo runs and what data it uses
 

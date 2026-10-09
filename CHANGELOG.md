@@ -4,6 +4,27 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.1.1]
+
+### Added
+
+- While a reply is read, its row shows a turning glyph in Claude's accent color and "Reading…" beside `[ ⏹ Stop ]`.
+
+### Changed
+
+- The status line under the prompt shows only for readings started with `/speak` or `autoRead`. A reading started from a reply's button shows on that row instead.
+- `/speak` prints nothing when it starts or stops a reading, so nothing extra lands in Claude's context. It still answers `voices`, and says when there is nothing to read.
+- `/speak` runs at once while Claude is working, so it can stop a reading mid-turn.
+
+### Fixed
+
+- `/clear`, `/resume` and `/branch` stop the voice. Before, it went on with no way left to stop it.
+
+### Docs
+
+- The VS Code extension's chat panel draws nothing from mods: `/speak` works there, without the button.
+- Hablo needs Claude Code 2.1.287 or later.
+
 ## [0.1.0]
 
 ### Added

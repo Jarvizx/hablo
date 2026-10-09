@@ -6,13 +6,12 @@ Thanks for helping. Issues and pull requests are welcome in English or Spanish.
 
 - **A new language:** see [Add a language](#add-a-language). It is one file and one test.
 - **Linux or Windows support:** see the [roadmap](ROADMAP.md).
-- **Trying Hablo in the VS Code extension** and reporting what you see.
 
 Look for issues labeled `good first issue`.
 
 ## Run it locally
 
-You need macOS (or Windows, for the experimental support) and Claude Code 2.1.292 or later.
+You need macOS (or Windows, for the experimental support) and Claude Code 2.1.287 or later.
 
 ```bash
 git clone https://github.com/Jarvizx/hablo
