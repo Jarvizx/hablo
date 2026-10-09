@@ -60,24 +60,37 @@ También funcionan en inglés: `stop`, `voices`, `rate`, `voice`, y `on` u `off`
 
 Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview), un plugin de function hooks, probado en Claude Code 2.1.292. La API de mods aún puede cambiar entre versiones.
 
-## Qué ejecuta Hablo y qué datos usa
+## Qué envía, ejecuta y guarda Hablo
 
-Hablo no usa la red y no envía nada a ningún sitio. La voz la genera tu sistema operativo en tu equipo.
+**Red:** ninguna. Hablo no hace peticiones de red.
 
-| Qué | Cuándo | Para qué |
+**Qué envía y adónde:** solo el texto que lee en voz alta, una respuesta o lo que hayas seleccionado, y solo al sintetizador de voz de tu sistema operativo, en tu equipo, por la entrada estándar: a `say` en macOS, y a un script de PowerShell que usa `System.Speech` en Windows. No va a ningún otro sitio.
+
+**Programas que ejecuta y por qué:**
+
+| Sistema | Comando | Para qué |
 | --- | --- | --- |
-| `say -v '?'` | Una vez por sesión, en macOS | Lista las voces instaladas en tu Mac |
-| `/bin/sh -c 'echo $$; exec say …'`, con el texto por la entrada estándar | En cada lectura, en macOS | Lee el texto e imprime el id del proceso para poder pararlo |
-| `kill <pid>` | Al parar una lectura, en macOS | Termina ese proceso `say` |
-| `powershell.exe` con `System.Speech` | Una vez por sesión y en cada lectura, en Windows | Lista las voces de Windows y lee el texto, que recibe en base64 por la entrada estándar |
-| `taskkill /PID <pid> /F` | Al parar una lectura, en Windows | Termina ese proceso de PowerShell |
+| macOS | `say -v '?'` | Una vez por sesión: lista las voces instaladas |
+| macOS | `/bin/sh -c 'echo $$; exec say "$@"' hablo [-v <voz>] [-r <velocidad>]`, con el texto por la entrada estándar | En cada lectura: el shell imprime su id de proceso y se convierte en `say`, que lee el texto |
+| macOS | `kill <pid>` | Termina ese proceso `say` cuando paras una lectura |
+| Windows | `powershell.exe -NoProfile -NonInteractive -EncodedCommand <script>` | Una vez por sesión, un script fijo lista las voces; en cada lectura, un script fijo carga `System.Speech`, elige la voz y la velocidad, lee el texto en base64 de la entrada estándar y lo pronuncia |
+| Windows | `taskkill /PID <pid> /F` | Termina ese proceso de PowerShell cuando paras una lectura |
 
-Lee:
+`<voz>` es una voz instalada en tu equipo, `<velocidad>` tu `/hablo velocidad` y `<pid>` el proceso que inició Hablo. Los scripts de Windows van codificados solo para que PowerShell los reciba enteros: su texto está en [`hooks/sapi.ts`](hooks/sapi.ts) y nada más cambia en ellos.
 
-- **El texto de una respuesta, o el que hayas seleccionado,** solo para leerlo en voz alta.
-- **Las variables de entorno `LC_ALL`, `LC_MESSAGES` y `LANG`,** para mostrar sus mensajes en inglés o en español, y **`OS`**, para reconocer Windows.
+**Sus hooks:**
 
-Guarda la última respuesta en la memoria de la sesión, para `/hablo`. En disco solo guarda tus ajustes (velocidad, una voz por idioma y `auto`), en su propio archivo bajo `~/.claude/plugins/store/`.
+| Hook | Qué hace |
+| --- | --- |
+| `session.start` | Registra `/hablo` y elige inglés o español para sus mensajes según `LC_ALL`, `LC_MESSAGES` o `LANG` |
+| `turn.complete` | Guarda el texto de la respuesta para `/hablo`, y la lee si `/hablo auto` está activado |
+| `command.run` de `/hablo` | Empieza o para una lectura, y muestra o cambia los ajustes |
+| `ui.render` de cada respuesta | Dibuja `[ ⏵ Escuchar ]` debajo, o `✻ Leyendo…  [ ■ Parar ]` mientras lee |
+| `session.end` | Para la voz con `/clear`, `/resume`, `/branch` y al cerrar la sesión |
+
+**Qué lee y guarda:** el texto de una respuesta o de tu selección, solo para leerlo; las variables de entorno `LC_ALL`, `LC_MESSAGES`, `LANG` y `OS`. Guarda la última respuesta en la memoria de la sesión, y en disco solo tus ajustes (velocidad, una voz por idioma y `auto`), en su propio archivo bajo `~/.claude/plugins/store/`.
+
+Hablo solo usa la API de mods de Claude Code y no llama a ningún otro plugin.
 
 ## Contribuir
 

@@ -63,7 +63,7 @@ Prefer short, very common words for `MARKERS`. A word shared with another langua
 
 - **No network.** Hablo speaks with the voices on the user's machine.
 - **No dependencies.** The plugin ships as readable source with nothing to install.
-- **Say what it runs.** A change that runs a new command or reads new data also updates "What Hablo runs and what data it uses" in both READMEs.
+- **Say what it runs.** A change that runs a new command or reads new data also updates "What Hablo sends, runs and keeps" in both READMEs.
 - **Keep both READMEs in step.** If you only write one language, say so in the pull request and someone will translate it.
 
 ## Commits and pull requests

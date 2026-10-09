@@ -65,24 +65,37 @@ The words also work in Spanish: `parar`, `voces`, `velocidad`, `voz`, and `sí` 
 
 Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview), a plugin of function hooks, tested on Claude Code 2.1.292. The mods API may still change between releases.
 
-## What Hablo runs and what data it uses
+## What Hablo sends, runs and keeps
 
-Hablo does not use the network and sends nothing anywhere. Your operating system synthesizes the speech on your machine.
+**Network:** none. Hablo makes no network requests.
 
-| What | When | Why |
+**What it sends, and where:** only the text it reads aloud, a reply or the text you selected, and only to your operating system's speech synthesizer on your machine, on standard input: to `say` on macOS, and to a PowerShell script that uses Windows' `System.Speech` on Windows. It goes nowhere else.
+
+**Programs it runs, and why:**
+
+| System | Command | Why |
 | --- | --- | --- |
-| `say -v '?'` | Once per session, on macOS | Lists the voices installed on your Mac |
-| `/bin/sh -c 'echo $$; exec say …'`, with the text on standard input | Each reading, on macOS | Speaks the text, and prints the process id so it can be stopped |
-| `kill <pid>` | When you stop a reading, on macOS | Stops that `say` process |
-| `powershell.exe` with `System.Speech` | Once per session, and each reading, on Windows | Lists the Windows voices, and speaks the text, which it receives as base64 on standard input |
-| `taskkill /PID <pid> /F` | When you stop a reading, on Windows | Stops that PowerShell process |
+| macOS | `say -v '?'` | Once per session: lists the installed voices |
+| macOS | `/bin/sh -c 'echo $$; exec say "$@"' hablo [-v <voice>] [-r <rate>]`, with the text on standard input | Each reading: the shell prints its process id, then becomes `say` and speaks the text |
+| macOS | `kill <pid>` | Stops that `say` process when you stop a reading |
+| Windows | `powershell.exe -NoProfile -NonInteractive -EncodedCommand <script>` | Once per session, a fixed script lists the voices; each reading, a fixed script loads `System.Speech`, selects the voice and rate, reads the text as base64 from standard input and speaks it |
+| Windows | `taskkill /PID <pid> /F` | Stops that PowerShell process when you stop a reading |
 
-It reads:
+`<voice>` is a voice installed on your machine, `<rate>` your `/hablo rate`, and `<pid>` the process Hablo started. The Windows scripts are encoded only so that PowerShell receives them whole: their plain text is in [`hooks/sapi.ts`](hooks/sapi.ts), and nothing else in them changes.
 
-- **The text of a reply, or the text you selected,** only to speak it.
-- **The `LC_ALL`, `LC_MESSAGES` and `LANG` environment variables,** to show its messages in English or Spanish, and **`OS`**, to tell Windows apart.
+**Its hooks:**
 
-It keeps the last reply in the session's memory, for `/hablo`. It saves only your settings (rate, a voice per language, and `auto`) in its own store file under `~/.claude/plugins/store/`.
+| Hook | What it does |
+| --- | --- |
+| `session.start` | Registers `/hablo`, and picks English or Spanish for its messages from `LC_ALL`, `LC_MESSAGES` or `LANG` |
+| `turn.complete` | Keeps the reply's text for `/hablo`, and reads it when `/hablo auto` is on |
+| `command.run` for `/hablo` | Starts or stops a reading, and shows or changes the settings |
+| `ui.render` for each reply | Draws `[ ⏵ Listen ]` under it, or `✻ Reading…  [ ■ Stop ]` while it reads |
+| `session.end` | Stops the voice on `/clear`, `/resume`, `/branch` and when the session ends |
+
+**What it reads and keeps:** the text of a reply or of your selection, only to speak it; the `LC_ALL`, `LC_MESSAGES`, `LANG` and `OS` environment variables. It keeps the last reply in the session's memory, and saves only your settings (rate, a voice per language, and `auto`) in its own store file under `~/.claude/plugins/store/`.
+
+Hablo uses only Claude Code's own mods API, and calls no other plugin.
 
 ## Contributing
 
