@@ -11,6 +11,7 @@
   "repository": "https://github.com/Jarvizx/hablo",
   "documentationUrl": "https://github.com/Jarvizx/hablo#readme",
   "supportUrl": "https://github.com/Jarvizx/hablo/issues",
+  "privacyPolicyUrl": "https://github.com/Jarvizx/hablo/blob/main/PRIVACY.md",
   "license": "MIT",
   "keywords": [
     "tts",
@@ -19,7 +20,8 @@
     "accessibility",
     "voice",
     "speech",
-    "macos"
+    "macos",
+    "windows"
   ],
   "icon": "./assets/icon.png",
   "types": "./types/index.d.ts"

@@ -90,7 +90,7 @@ Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview), un plu
 
 **Qué lee y guarda:** el texto de una respuesta o de tu selección, solo para leerlo; las variables de entorno `LC_ALL`, `LC_MESSAGES`, `LANG` y `OS`. Guarda la última respuesta en la memoria de la sesión, y en disco solo tus ajustes (velocidad, una voz por idioma y `auto`), en su propio archivo bajo `~/.claude/plugins/store/`.
 
-Hablo solo usa la API de mods de Claude Code y no llama a ningún otro plugin.
+Hablo solo usa la API de mods de Claude Code y no llama a ningún otro plugin. Mira también la [política de privacidad](PRIVACY.md) (en inglés).
 
 ## Contribuir
 

@@ -95,7 +95,7 @@ Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview), a plugi
 
 **What it reads and keeps:** the text of a reply or of your selection, only to speak it; the `LC_ALL`, `LC_MESSAGES`, `LANG` and `OS` environment variables. It keeps the last reply in the session's memory, and saves only your settings (rate, a voice per language, and `auto`) in its own store file under `~/.claude/plugins/store/`.
 
-Hablo uses only Claude Code's own mods API, and calls no other plugin.
+Hablo uses only Claude Code's own mods API, and calls no other plugin. See also the [privacy policy](PRIVACY.md).
 
 ## Contributing
 
