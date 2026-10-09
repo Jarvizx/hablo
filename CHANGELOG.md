@@ -4,6 +4,16 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Changed
+
+- **Breaking:** the command is now `/hablo`, named after the plugin, instead of `/speak`. Mods' commands carry no plugin prefix, so a generic name could clash with another plugin or a future Claude Code command. `/hablo stop`, `/hablo voices` and `/hablo <text>` work as `/speak` did.
+
+### Fixed
+
+- Windows Terminal drew two glyphs as color emoji. The reading indicator no longer uses `✳`, and Stop shows `■` instead of `⏹`. A test checks that no glyph Hablo draws has an emoji form.
+
 ## [0.1.3]
 
 ### Fixed

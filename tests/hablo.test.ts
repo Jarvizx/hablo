@@ -8,7 +8,7 @@ const SAPI_VOICES = 'Microsoft Helena Desktop|es-ES\r\nMicrosoft Zira Desktop|en
 
 const command = (args: string) =>
   ({
-    command: 'speak',
+    command: 'hablo',
     args,
     origin: { kind: 'composer' },
     presentation: { isFullscreen: true, columns: 120 },
@@ -77,14 +77,14 @@ const host = (on: On, env: Record<string, string> = {}) => {
   return { spoken, killed, statuses, clock, idle, started, readUntilKilled: () => (isLong = true) }
 }
 
-test('/speak with nothing to read says so', async ($, on) => {
+test('/hablo with nothing to read says so', async ($, on) => {
   host(on)
   const res = await $.command.run(command(''))
 
   expect(res.text).toBe('Nothing to read yet.')
 })
 
-test('/speak <text> reads it with a Spanish voice, shows the status line and prints nothing', async ($, on) => {
+test('/hablo <text> reads it with a Spanish voice, shows the status line and prints nothing', async ($, on) => {
   const { spoken, statuses, idle } = host(on)
   const res = await $.command.run(command('Hola, esto es una prueba para ver si el mod lee bien'))
   await idle
@@ -97,7 +97,7 @@ test('/speak <text> reads it with a Spanish voice, shows the status line and pri
   expect(spoken[0]?.input).toBe('Hola, esto es una prueba para ver si el mod lee bien.')
 })
 
-test('/speak again stops the reading', async ($, on) => {
+test('/hablo again stops the reading', async ($, on) => {
   const { killed, idle, started, readUntilKilled } = host(on)
   readUntilKilled()
 
@@ -110,7 +110,7 @@ test('/speak again stops the reading', async ($, on) => {
   expect(killed).toEqual(['4242'])
 })
 
-test('/speak parar stops it too', async ($, on) => {
+test('/hablo parar stops it too', async ($, on) => {
   const { killed, idle, started, readUntilKilled } = host(on)
   readUntilKilled()
 
@@ -122,7 +122,7 @@ test('/speak parar stops it too', async ($, on) => {
   expect(killed).toEqual(['4242'])
 })
 
-test('[ ⏵ Listen ] under a reply reads it, and [ ⏹ Stop ] stops it', async ($, on) => {
+test('[ ⏵ Listen ] under a reply reads it, and [ ■ Stop ] stops it', async ($, on) => {
   const { spoken, killed, statuses, clock, idle, started, readUntilKilled } = host(on)
   readUntilKilled()
   const ui = await $.ui.mount(reply('desktop', 'This is a long reply that you will want to stop before the end'))
@@ -137,6 +137,13 @@ test('[ ⏵ Listen ] under a reply reads it, and [ ⏹ Stop ] stops it', async (
   expect(before).toContain('Reading…')
   await clock.advance(140)
   expect((await ui.find({ type: 'Text', text: /Reading…/ }))?.text).not.toBe(before)
+
+  // No glyph it draws has an emoji form, which Windows Terminal would paint in color.
+  for (let i = 0; i < 10; i += 1) {
+    expect((await ui.find({ type: 'Text', text: /Reading…/ }))?.text).not.toMatch(/\p{Emoji}/u)
+    await clock.advance(140)
+  }
+  expect((await ui.find({ key: 'stop' }))?.text).toBe('■ Stop')
   expect(statuses.filter(Boolean)).toEqual([])
 
   // "Reading…" and Stop sit side by side in one row Box, with nothing between.
@@ -177,7 +184,7 @@ test('on Windows it speaks through PowerShell with a Windows voice, and stops wi
   expect(killed).toEqual(['4242'])
 })
 
-test('/speak voices lists the Windows voices on Windows', async ($, on) => {
+test('/hablo voices lists the Windows voices on Windows', async ($, on) => {
   host(on, { OS: 'Windows_NT' })
   const res = await $.command.run(command('voices'))
 
@@ -185,7 +192,7 @@ test('/speak voices lists the Windows voices on Windows', async ($, on) => {
   expect(res.text).toContain('en: Microsoft Zira Desktop')
 })
 
-test('/speak is registered to run while Claude is working', async ($, on) => {
+test('/hablo is registered to run while Claude is working', async ($, on) => {
   host(on)
   const registered: { name: string; immediate?: true }[] = []
   on('command.register', (_, e) => {
@@ -197,7 +204,7 @@ test('/speak is registered to run while Claude is working', async ($, on) => {
 
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
 
-  expect(registered[0]).toMatchObject({ name: 'speak', immediate: true })
+  expect(registered[0]).toMatchObject({ name: 'hablo', immediate: true })
 })
 
 test('/clear stops the voice', async ($, on) => {

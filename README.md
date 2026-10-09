@@ -9,7 +9,7 @@
 
 <!-- Demo: add docs/demo.gif here once it is recorded. -->
 
-Hablo is a plugin for Claude Code that reads replies aloud. It puts a **Listen** button under each reply, adds a `/speak` command, and picks a natural voice for the language of each reply. It runs on the voices that come with macOS, and on Windows voices in an experimental mode: free, offline, no API keys.
+Hablo is a plugin for Claude Code that reads replies aloud. It puts a **Listen** button under each reply, adds a `/hablo` command, and picks a natural voice for the language of each reply. It runs on the voices that come with macOS, and on Windows voices in an experimental mode: free, offline, no API keys.
 
 ## Why
 
@@ -19,8 +19,8 @@ Hablo is a plugin for Claude Code that reads replies aloud. It puts a **Listen**
 
 ## Features
 
-- **`[ ⏵ Listen ]` under every reply:** press it to hear that reply. While it reads, the row shows `✻ Reading…  [ ⏹ Stop ]`, with the glyph turning like Claude's own spinner.
-- **`/speak`:** reads the text you selected with the mouse, or the last reply when nothing is selected. Run it again to stop, even while Claude is working. It prints nothing in the conversation, so Claude's context stays clean, and a line under the prompt shows that it is reading.
+- **`[ ⏵ Listen ]` under every reply:** press it to hear that reply. While it reads, the row shows `✻ Reading…  [ ■ Stop ]`, with the glyph turning like Claude's own spinner.
+- **`/hablo`:** reads the text you selected with the mouse, or the last reply when nothing is selected. Run it again to stop, even while Claude is working. It prints nothing in the conversation, so Claude's context stays clean, and a line under the prompt shows that it is reading.
 - **Your language:** detects Spanish, English, Portuguese, French, German and Italian, and picks a natural voice installed on your computer for each one.
 - **Speakable text:** code blocks, links, tables and markdown symbols are cleaned up before reading.
 - **Private:** nothing leaves your machine. See [what Hablo runs](#what-hablo-runs-and-what-data-it-uses).
@@ -39,14 +39,14 @@ Answer `y` to add the marketplace, then pick a scope (user is the default).
 
 | Command | What it does |
 | --- | --- |
-| `/speak` | Reads the selection, or the last reply. Stops if it is already reading. |
-| `/speak stop` | Stops reading. |
-| `/speak voices` | Shows the voice used for each language. |
-| `/speak <text>` | Reads that text. Handy to try a voice. |
+| `/hablo` | Reads the selection, or the last reply. Stops if it is already reading. |
+| `/hablo stop` | Stops reading. |
+| `/hablo voices` | Shows the voice used for each language. |
+| `/hablo <text>` | Reads that text. Handy to try a voice. |
 
 The words also work in Spanish: `parar`, `voces`.
 
-The Listen button shows where Claude Code draws clickable rows: the terminal's fullscreen layout and the desktop app. Everywhere else, use `/speak`.
+The Listen button shows where Claude Code draws clickable rows: the terminal's fullscreen layout and the desktop app. Everywhere else, use `/hablo`.
 
 ## Settings
 
@@ -71,7 +71,7 @@ On Windows, Hablo uses the voices that `System.Speech` sees, such as Microsoft H
 | Where | Status |
 | --- | --- |
 | macOS, terminal and desktop app | ✅ Supported |
-| VS Code extension | ⚠️ `/speak` works, but Claude Code draws nothing from mods in the extension's chat panel, so there is no button. In VS Code's integrated terminal everything works |
+| VS Code extension | ⚠️ `/hablo` works, but Claude Code draws nothing from mods in the extension's chat panel, so there is no button. In VS Code's integrated terminal everything works |
 | Windows | 🧪 Experimental: Windows voices through PowerShell, with voice choice and stop. Being tested |
 | Linux | ⚠️ Falls back to the system synthesizer Claude Code finds, without voice choice or stop. Untested. Help wanted, see the [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, containers | ❌ The sound plays on the machine where Claude Code runs, not on yours |
@@ -96,15 +96,15 @@ It reads:
 - **The `LC_ALL`, `LC_MESSAGES` and `LANG` environment variables,** to show its messages in English or Spanish.
 - **The `OS` environment variable,** to tell Windows apart.
 
-It keeps the last reply in the session's memory for `/speak`, and nothing on disk. Your settings live in Claude Code's `settings.json`, like any plugin's.
+It keeps the last reply in the session's memory for `/hablo`, and nothing on disk. Your settings live in Claude Code's `settings.json`, like any plugin's.
 
 ## How it works
 
 1. When a turn ends, Hablo keeps the reply's text.
-2. When you press Listen or run `/speak`, it cleans the markdown, guesses the language from common words, and picks a voice for it.
+2. When you press Listen or run `/hablo`, it cleans the markdown, guesses the language from common words, and picks a voice for it.
 3. It starts `say` (or, on Windows, a PowerShell script) that first prints its process id, so Stop can end it.
 
-The code is three files: [`hooks/register.tsx`](hooks/register.tsx) (the hooks, the button and `/speak`), [`hooks/speech.ts`](hooks/speech.ts) (markdown cleanup, language detection and voice choice) and [`hooks/sapi.ts`](hooks/sapi.ts) (the Windows scripts).
+The code is three files: [`hooks/register.tsx`](hooks/register.tsx) (the hooks, the button and `/hablo`), [`hooks/speech.ts`](hooks/speech.ts) (markdown cleanup, language detection and voice choice) and [`hooks/sapi.ts`](hooks/sapi.ts) (the Windows scripts).
 
 ## Contributing
 

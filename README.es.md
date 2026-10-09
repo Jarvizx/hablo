@@ -4,7 +4,7 @@
 
 [Read in English](README.md)
 
-Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/speak` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS y, en modo experimental, las de Windows: gratis, sin conexión y sin claves de API.
+Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/hablo` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS y, en modo experimental, las de Windows: gratis, sin conexión y sin claves de API.
 
 ## Para qué
 
@@ -14,8 +14,8 @@ Hablo es un plugin para Claude Code que lee las respuestas en voz alta. Pone un 
 
 ## Funciones
 
-- **`[ ⏵ Escuchar ]` debajo de cada respuesta:** púlsalo para escucharla. Mientras lee, la fila muestra `✻ Leyendo…  [ ⏹ Parar ]`, con el símbolo girando como el spinner de Claude.
-- **`/speak`:** lee el texto que hayas seleccionado con el ratón o, si no hay selección, la última respuesta. Si lo vuelves a lanzar, para, aunque Claude esté trabajando. No escribe nada en la conversación, así el contexto de Claude queda limpio, y una línea bajo el prompt indica que está leyendo.
+- **`[ ⏵ Escuchar ]` debajo de cada respuesta:** púlsalo para escucharla. Mientras lee, la fila muestra `✻ Leyendo…  [ ■ Parar ]`, con el símbolo girando como el spinner de Claude.
+- **`/hablo`:** lee el texto que hayas seleccionado con el ratón o, si no hay selección, la última respuesta. Si lo vuelves a lanzar, para, aunque Claude esté trabajando. No escribe nada en la conversación, así el contexto de Claude queda limpio, y una línea bajo el prompt indica que está leyendo.
 - **Tu idioma:** detecta español, inglés, portugués, francés, alemán e italiano, y usa una voz natural instalada en tu equipo para cada uno.
 - **Texto limpio:** quita bloques de código, enlaces, tablas y símbolos de markdown antes de leer.
 - **Privado:** nada sale de tu equipo. Mira [qué ejecuta Hablo](#qué-ejecuta-hablo-y-qué-datos-usa).
@@ -34,14 +34,14 @@ Responde `y` para añadir el marketplace y elige el ámbito (user por defecto).
 
 | Comando | Qué hace |
 | --- | --- |
-| `/speak` | Lee la selección o la última respuesta. Si ya está leyendo, para. |
-| `/speak parar` | Para la lectura. |
-| `/speak voces` | Muestra la voz de cada idioma. |
-| `/speak <texto>` | Lee ese texto. Útil para probar una voz. |
+| `/hablo` | Lee la selección o la última respuesta. Si ya está leyendo, para. |
+| `/hablo parar` | Para la lectura. |
+| `/hablo voces` | Muestra la voz de cada idioma. |
+| `/hablo <texto>` | Lee ese texto. Útil para probar una voz. |
 
 También funcionan en inglés: `stop`, `voices`.
 
-El botón Escuchar aparece donde Claude Code permite hacer clic: el modo de pantalla completa de la terminal y la app de escritorio. En los demás casos, usa `/speak`.
+El botón Escuchar aparece donde Claude Code permite hacer clic: el modo de pantalla completa de la terminal y la app de escritorio. En los demás casos, usa `/hablo`.
 
 ## Ajustes
 
@@ -66,7 +66,7 @@ En Windows, Hablo usa las voces que ve `System.Speech`, como Microsoft Helena, S
 | Dónde | Estado |
 | --- | --- |
 | macOS, terminal y app de escritorio | ✅ Soportado |
-| Extensión de VS Code | ⚠️ `/speak` funciona, pero Claude Code no dibuja nada de los mods en el panel de chat de la extensión, así que no hay botón. En la terminal integrada de VS Code funciona todo |
+| Extensión de VS Code | ⚠️ `/hablo` funciona, pero Claude Code no dibuja nada de los mods en el panel de chat de la extensión, así que no hay botón. En la terminal integrada de VS Code funciona todo |
 | Windows | 🧪 Experimental: voces de Windows a través de PowerShell, con elección de voz y parar. En pruebas |
 | Linux | ⚠️ Usa el sintetizador del sistema que encuentre Claude Code, sin elegir voz ni parar. Sin probar. Se busca ayuda, mira el [roadmap](ROADMAP.md) |
 | SSH, VS Code Remote, contenedores | ❌ El sonido sale en la máquina donde corre Claude Code, no en la tuya |
@@ -91,7 +91,7 @@ Lee:
 - **Las variables de entorno `LC_ALL`, `LC_MESSAGES` y `LANG`,** para mostrar sus mensajes en inglés o en español.
 - **La variable de entorno `OS`,** para reconocer Windows.
 
-Guarda la última respuesta en la memoria de la sesión para `/speak`, y nada en disco. Tus ajustes viven en el `settings.json` de Claude Code, como los de cualquier plugin.
+Guarda la última respuesta en la memoria de la sesión para `/hablo`, y nada en disco. Tus ajustes viven en el `settings.json` de Claude Code, como los de cualquier plugin.
 
 ## Contribuir
 

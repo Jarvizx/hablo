@@ -2,8 +2,8 @@
 
 ## v0.1 · Now
 
-- [x] `/speak` reads the selection or the last reply
-- [x] `[ ⏵ Listen ]` and `[ ⏹ Stop ]` under each reply, with a turning reading indicator (0.1.1)
+- [x] `/hablo` reads the selection or the last reply
+- [x] `[ ⏵ Listen ]` and `[ ■ Stop ]` under each reply, with a turning reading indicator (0.1.1)
 - [x] Language detection (es, en, pt, fr, de, it) and a natural voice for each
 - [x] Markdown cleanup: code blocks, links, tables and symbols
 - [x] Settings: `rate`, `voices`, `autoRead`
@@ -13,7 +13,7 @@
 
 - [ ] Linux: `spd-say` or `espeak-ng`, with stop
 - [ ] Windows: confirm the experimental PowerShell `System.Speech` support on real machines
-- [ ] A keyboard shortcut to play and stop without typing `/speak`
+- [ ] A keyboard shortcut to play and stop without typing `/hablo`
 - [ ] "Code block omitted" instead of skipping code in silence
 - [ ] Read the whole reply from any of its blocks
 - [ ] Speaking rate per language

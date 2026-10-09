@@ -18,7 +18,7 @@ describe('cleanForSpeech', () => {
       [
         '## Resumen',
         '',
-        'Usa **`/speak`** para leer [la guía](https://example.com) 🔊',
+        'Usa **`/hablo`** para leer [la guía](https://example.com) 🔊',
         '',
         '```ts',
         'const x = 1',
@@ -30,7 +30,7 @@ describe('cleanForSpeech', () => {
       ].join('\n'),
     )
 
-    expect(text).toBe(['Resumen.', 'Usa /speak para leer la guía.', 'Primer punto.', 'Opción, Precio.', 'Mod, Gratis.'].join('\n'))
+    expect(text).toBe(['Resumen.', 'Usa /hablo para leer la guía.', 'Primer punto.', 'Opción, Precio.', 'Mod, Gratis.'].join('\n'))
   })
 
   test('leaves nothing for a reply that is only code', () => {

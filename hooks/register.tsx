@@ -11,14 +11,15 @@ const speaking = atom({ plugin: 'hablo', key: 'speaking' } as const, null)
 const frame = atom({ plugin: 'hablo', key: 'frame' } as const, 0)
 const lastReply = atom({ plugin: 'hablo', key: 'lastReply' } as const, '')
 
-// The glyphs of Claude Code's own spinner, there and back.
-const GLYPHS = ['·', '✢', '✳', '✶', '✻', '✽', '✻', '✶', '✳', '✢']
+// The glyphs of Claude Code's own spinner, there and back, without ✳: it has an emoji
+// form, which some terminals (Windows Terminal) draw in color. None of these has one.
+const GLYPHS = ['·', '✢', '✶', '✻', '✽', '✻', '✶', '✢']
 // Under the 10 redraws a second a transcript row is allowed.
 const FRAME_MS = 140
 
 const MESSAGES = {
   en: {
-    reading: '⏵ Reading aloud · /speak to stop',
+    reading: '⏵ Reading aloud · /hablo to stop',
     readingShort: 'Reading…',
     nothing: 'Nothing to read yet.',
     voices: 'Voices',
@@ -29,7 +30,7 @@ const MESSAGES = {
     stop: 'Stop',
   },
   es: {
-    reading: '⏵ Leyendo en voz alta · /speak para parar',
+    reading: '⏵ Leyendo en voz alta · /hablo para parar',
     readingShort: 'Leyendo…',
     nothing: 'Todavía no hay nada que leer.',
     voices: 'Voces',
@@ -42,10 +43,10 @@ const MESSAGES = {
 }
 
 // `hasStatus`: the reading shows on the status line, for when no reply row shows it
-// (started from /speak or autoRead, not from a reply's own button).
+// (started from /hablo or autoRead, not from a reply's own button).
 type Job = { id: string; text: string; hasStatus: boolean }
 
-// The words /speak takes, in English and Spanish.
+// The words /hablo takes, in English and Spanish.
 const ACTIONS: Partial<Record<string, 'stop' | 'voices'>> = {
   stop: 'stop',
   parar: 'stop',
@@ -192,10 +193,10 @@ export const register: Register = (on, options) => {
     t = locale.toLowerCase().startsWith('es') ? MESSAGES.es : MESSAGES.en
 
     await $.command.register({
-      name: 'speak',
+      name: 'hablo',
       description: 'Read aloud the selection or the last reply; again to stop',
       argumentHint: '[stop | voices | text]',
-      // So that /speak stops a reading at once, even while Claude is working.
+      // So that /hablo stops a reading at once, even while Claude is working.
       immediate: true,
     })
     // A reading cut by a reload leaves its id behind.
@@ -212,7 +213,7 @@ export const register: Register = (on, options) => {
     return next(e)
   })
 
-  // Keeps the last reply for /speak, and reads it when autoRead is on.
+  // Keeps the last reply for /hablo, and reads it when autoRead is on.
   on('turn.complete', async ($, e, next) => {
     const result = await next(e)
     if (e.reason === 'answer' && result.text.trim() !== '') {
@@ -227,9 +228,9 @@ export const register: Register = (on, options) => {
 
   // Starting and stopping print nothing: the status line shows the reading, and a
   // line in the transcript would also land in what Claude reads.
-  on('command.run', { command: 'speak' }, async ($, e) => {
+  on('command.run', { command: 'hablo' }, async ($, e) => {
     const arg = e.args.trim()
-    // Bare /speak reads, or stops a reading.
+    // Bare /hablo reads, or stops a reading.
     const action = ACTIONS[arg.toLowerCase()] ?? (arg === '' && (await read($, speaking)) !== null ? 'stop' : undefined)
 
     if (action === 'stop') {
@@ -251,7 +252,7 @@ export const register: Register = (on, options) => {
   })
 
   // Under each reply: [ ⏵ Listen ]. While that reply is read: a turning glyph in
-  // Claude's accent color, "Reading…", and [ ⏹ Stop ].
+  // Claude's accent color, "Reading…", and [ ■ Stop ].
   on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
     const own = await next(e)
     const hasPointer = e.surface !== 'terminal' || e.viewport?.isFullscreen === true
@@ -274,7 +275,7 @@ export const register: Register = (on, options) => {
               <Text key="reading" color="claude">
                 {glyph} {t.readingShort}
               </Text>,
-              <Button key="stop" variant="primary" label={`⏹ ${t.stop}`} onPress={() => stop($)} />,
+              <Button key="stop" variant="primary" label={`■ ${t.stop}`} onPress={() => stop($)} />,
             ]
           ) : (
             <Button

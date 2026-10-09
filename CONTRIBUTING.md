@@ -19,13 +19,13 @@ cd hablo
 claude --plugin-dir .
 ```
 
-In that session, `/speak Hello, this is a test` should read aloud. Edits to the plugin's files reload when a turn ends.
+In that session, `/hablo Hello, this is a test` should read aloud. Edits to the plugin's files reload when a turn ends.
 
 ## Project layout
 
 | Path | What it holds |
 | --- | --- |
-| `hooks/register.tsx` | The hooks: the Listen button, `/speak`, the last reply, and the `say` process |
+| `hooks/register.tsx` | The hooks: the Listen button, `/hablo`, the last reply, and the `say` process |
 | `hooks/speech.ts` | Pure helpers with no `$`: markdown cleanup, language detection, voice choice |
 | `hooks/sapi.ts` | Pure helpers for Windows: the PowerShell scripts and their encoding |
 | `types/index.d.ts` | The `$.state` values the plugin keeps |
