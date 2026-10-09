@@ -267,7 +267,7 @@ export const register: Register = (on, options) => {
     return (
       <Box flexDirection="column">
         {own}
-        <Box paddingLeft={2} columnGap={2}>
+        <Box flexDirection="row" alignItems="center" paddingLeft={2} columnGap={2}>
           {isReading ? (
             <>
               <Text key="reading" color="claude">

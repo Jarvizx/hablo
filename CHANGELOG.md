@@ -4,6 +4,12 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.1.2]
+
+### Fixed
+
+- "Reading…" and `[ ⏹ Stop ]` share one line under the reply. Some terminals stacked them on two.
+
 ## [0.1.1]
 
 ### Added
