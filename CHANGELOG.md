@@ -4,6 +4,12 @@ All notable changes to Hablo are listed here. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.1.3]
+
+### Fixed
+
+- "Reading…" and `[ ⏹ Stop ]` now really share one line. The fix in 0.1.2 missed the cause: they sat in a JSX fragment, which draws as a column.
+
 ## [0.1.2]
 
 ### Fixed

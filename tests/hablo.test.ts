@@ -139,6 +139,12 @@ test('[ ⏵ Listen ] under a reply reads it, and [ ⏹ Stop ] stops it', async (
   expect((await ui.find({ type: 'Text', text: /Reading…/ }))?.text).not.toBe(before)
   expect(statuses.filter(Boolean)).toEqual([])
 
+  // "Reading…" and Stop sit side by side in one row Box, with nothing between.
+  expect(await ui.drawn()).toMatchObject({
+    type: 'Box',
+    children: [{ type: 'engine' }, { type: 'Box', children: [{ type: 'Text' }, { type: 'Button' }] }],
+  })
+
   await ui.press({ key: 'stop' })
   await idle
 

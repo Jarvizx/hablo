@@ -268,13 +268,14 @@ export const register: Register = (on, options) => {
       <Box flexDirection="column">
         {own}
         <Box flexDirection="row" alignItems="center" paddingLeft={2} columnGap={2}>
+          {/* A list, not <>…</>: a fragment draws as a column Box and would stack them. */}
           {isReading ? (
-            <>
+            [
               <Text key="reading" color="claude">
                 {glyph} {t.readingShort}
-              </Text>
-              <Button key="stop" variant="primary" label={`⏹ ${t.stop}`} onPress={() => stop($)} />
-            </>
+              </Text>,
+              <Button key="stop" variant="primary" label={`⏹ ${t.stop}`} onPress={() => stop($)} />,
+            ]
           ) : (
             <Button
               key="play"
