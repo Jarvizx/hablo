@@ -4,7 +4,12 @@
 
 [Read in English](README.md)
 
-Hablo es un plugin para Claude Code que lee las respuestas en voz alta: para descansar la vista, para escuchar mientras miras el código o para practicar un idioma que estás aprendiendo. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/hablo` y elige una voz natural según el idioma de cada respuesta. Usa las voces que vienen con macOS y con Windows: gratis, sin conexión y sin claves de API.
+![Hablo leyendo en voz alta respuestas de Claude Code en inglés, español y francés](docs/demo.gif)
+
+Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview) para Claude Code, un plugin que se suma a la propia interfaz de Claude Code. Lee las respuestas en voz alta: para descansar la vista, para escuchar mientras miras el código o para practicar un idioma que estás aprendiendo. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/hablo` y elige una voz natural según el idioma de cada respuesta.
+
+- **Cero tokens:** leer nunca llama a Claude, y `/hablo` no añade nada a la conversación. No gasta tokens y deja el contexto de Claude como estaba.
+- **Gratis y local:** usa las voces que vienen con macOS y con Windows, así que la voz se genera en tu equipo. Sin librerías que instalar, sin claves de API, y Hablo no hace ninguna petición de red.
 
 ## Instalación
 
@@ -15,6 +20,8 @@ En el prompt de Claude Code:
 ```
 
 Responde `y` para añadir el marketplace y elige el ámbito (user por defecto). No hay nada que configurar.
+
+![Instalando Hablo y probando /hablo](docs/install.gif)
 
 **Requisitos:** Claude Code 2.1.287 o posterior, en macOS o Windows.
 
@@ -50,7 +57,7 @@ También funcionan en inglés: `stop`, `voices`, `rate`, `voice`, y `on` u `off`
 
 | Dónde | Estado |
 | --- | --- |
-| macOS, terminal | ✅ Probado |
+| macOS, terminal | ✅ Probado en Warp |
 | Windows, terminal | ✅ Probado en Windows 11 |
 | VS Code, terminal integrada | ✅ Probado |
 | App de escritorio (pestaña Code) | ⚠️ La API de mods dibuja ahí y los tests lo cubren, pero aún no se ha probado a mano |
@@ -58,7 +65,7 @@ También funcionan en inglés: `stop`, `voices`, `rate`, `voice`, y `on` u `off`
 | Linux | ⚠️ Usa el sintetizador que encuentre Claude Code, sin elegir voz ni parar. Sin probar, se busca ayuda |
 | SSH, VS Code Remote, contenedores | ❌ El sonido sale en la máquina donde corre Claude Code, no en la tuya |
 
-Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview), un plugin de function hooks, probado en Claude Code 2.1.292. La API de mods aún puede cambiar entre versiones.
+Hablo está probado en Claude Code 2.1.292. La API de mods aún puede cambiar entre versiones.
 
 ## Qué envía, ejecuta y guarda Hablo
 
