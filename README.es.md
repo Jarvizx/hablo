@@ -6,6 +6,10 @@
 
 ![Hablo leyendo en voz alta respuestas de Claude Code en inglés, español y francés](docs/demo.gif)
 
+Con sonido:
+
+https://github.com/user-attachments/assets/eb70eefb-dd12-472e-9227-9dbe01feb488
+
 Hablo es un [mod](https://code.claude.com/docs/en/plugins/mods/overview) para Claude Code, un plugin que se suma a la propia interfaz de Claude Code. Lee las respuestas en voz alta: para descansar la vista, para escuchar mientras miras el código o para practicar un idioma que estás aprendiendo. Pone un botón **Escuchar** debajo de cada respuesta, añade el comando `/hablo` y elige una voz natural según el idioma de cada respuesta.
 
 - **Cero tokens:** leer nunca llama a Claude, y `/hablo` no añade nada a la conversación. No gasta tokens y deja el contexto de Claude como estaba.

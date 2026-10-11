@@ -9,6 +9,10 @@
 
 ![Hablo reading Claude Code's replies aloud in English, Spanish and French](docs/demo.gif)
 
+With sound:
+
+https://github.com/user-attachments/assets/eb70eefb-dd12-472e-9227-9dbe01feb488
+
 Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview) for Claude Code, a plugin that adds to Claude Code's own interface. It reads replies aloud: to rest your eyes, to listen while you look at the code, or to practice a language you are learning. It puts a **Listen** button under each reply, adds a `/hablo` command, and picks a natural voice for the language of each reply.
 
 - **Zero tokens:** reading never calls Claude, and `/hablo` adds nothing to the conversation. It costs no tokens and leaves Claude's context as it was.
