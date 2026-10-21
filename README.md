@@ -7,9 +7,16 @@
 
 [Leer en español](README.es.md)
 
-<!-- Demo: add docs/demo.gif here once it is recorded. -->
+![Hablo reading Claude Code's replies aloud in English, Spanish and French](docs/demo.gif)
 
-Hablo is a plugin for Claude Code that reads replies aloud: to rest your eyes, to listen while you look at the code, or to practice a language you are learning. It puts a **Listen** button under each reply, adds a `/hablo` command, and picks a natural voice for the language of each reply. It uses the voices that come with macOS and Windows: free, offline, no API keys.
+With sound:
+
+https://github.com/user-attachments/assets/eb70eefb-dd12-472e-9227-9dbe01feb488
+
+Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview) for Claude Code, a plugin that adds to Claude Code's own interface. It reads replies aloud: to rest your eyes, to listen while you look at the code, or to practice a language you are learning. It puts a **Listen** button under each reply, adds a `/hablo` command, and picks a natural voice for the language of each reply.
+
+- **Zero tokens:** reading never calls Claude, and `/hablo` adds nothing to the conversation. It costs no tokens and leaves Claude's context as it was.
+- **Free and local:** it uses the voices that come with macOS and Windows, so the speech is made on your computer. No libraries to install, no API keys, and Hablo makes no network requests.
 
 ## Install
 
@@ -20,6 +27,8 @@ At the Claude Code prompt:
 ```
 
 Answer `y` to add the marketplace and pick a scope (user is the default). There is nothing to configure.
+
+![Installing Hablo and trying /hablo](docs/install.gif)
 
 **Requirements:** Claude Code 2.1.287 or later, on macOS or Windows.
 
@@ -55,7 +64,7 @@ The words also work in Spanish: `parar`, `voces`, `velocidad`, `voz`, and `sí` 
 
 | Where | Status |
 | --- | --- |
-| macOS, terminal | ✅ Tested |
+| macOS, terminal | ✅ Tested in Warp |
 | Windows, terminal | ✅ Tested on Windows 11 |
 | VS Code, integrated terminal | ✅ Tested |
 | Desktop app (Code tab) | ⚠️ The mods API draws there and the tests cover it, but it has not been tried by hand yet |
@@ -63,7 +72,7 @@ The words also work in Spanish: `parar`, `voces`, `velocidad`, `voz`, and `sí` 
 | Linux | ⚠️ Falls back to the speech synthesizer Claude Code finds, without voice choice or stop. Untested, help wanted |
 | SSH, VS Code Remote, containers | ❌ The sound plays on the machine where Claude Code runs, not on yours |
 
-Hablo is a [mod](https://code.claude.com/docs/en/plugins/mods/overview), a plugin of function hooks, tested on Claude Code 2.1.292. The mods API may still change between releases.
+Hablo is tested on Claude Code 2.1.292. The mods API may still change between releases.
 
 ## What Hablo sends, runs and keeps
 
